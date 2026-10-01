@@ -48,25 +48,35 @@ envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/htt
 mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/public bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 
+echo "==> [Entrypoint] Caching Laravel configuration..."
 su-exec www-data php artisan config:cache
 
 case "${RUN_MIGRATIONS:-true}" in
-    true) su-exec www-data php artisan migrate --force --no-interaction ;;
+    true)
+        echo "==> [Entrypoint] Running database migrations..."
+        su-exec www-data php artisan migrate --force --no-interaction
+        ;;
     false) ;;
     *) echo "RUN_MIGRATIONS must be true or false" >&2; exit 1 ;;
 esac
 
 case "${RUN_SEEDERS:-false}" in
-    true) su-exec www-data php artisan db:seed --force --no-interaction ;;
+    true)
+        echo "==> [Entrypoint] Running database seeders..."
+        su-exec www-data php artisan db:seed --force --no-interaction
+        ;;
     false) ;;
     *) echo "RUN_SEEDERS must be true or false" >&2; exit 1 ;;
 esac
 
+echo "==> [Entrypoint] Caching routes and views..."
 su-exec www-data php artisan route:cache
 su-exec www-data php artisan view:cache
 
+echo "==> [Entrypoint] Testing Nginx and PHP-FPM configuration..."
 nginx -t
 php-fpm -t
+
 
 # Stop the whole container if either server exits, and forward stop signals.
 server_pids=()
