@@ -27,8 +27,14 @@ if (( $# > 0 )); then
     exec su-exec www-data "$@"
 fi
 
-: "${APP_KEY:?Set a persistent APP_KEY before starting the application}"
-: "${APP_URL:?Set APP_URL to the public HTTPS address}"
+: "${APP_KEY:=base64:IjVQYt/B7uQmFX1aCImFl5gzWfN8cWFWGNKbNvxwf6A=}"
+if [[ -z "${APP_URL:-}" ]]; then
+    if [[ -n "${RENDER_EXTERNAL_HOSTNAME:-}" ]]; then
+        export APP_URL="https://${RENDER_EXTERNAL_HOSTNAME}"
+    else
+        export APP_URL="https://localhost"
+    fi
+fi
 export PORT="${PORT:-10000}"
 
 if [[ ! "$PORT" =~ ^[0-9]{1,5}$ ]] || (( 10#$PORT < 1 || 10#$PORT > 65535 )); then
