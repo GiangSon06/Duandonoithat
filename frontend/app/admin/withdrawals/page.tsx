@@ -357,7 +357,7 @@ export default function AdminWithdrawalsPage() {
                         </span>
                         {rec.admin_notes && (
                           <p className="text-[10px] text-beige/30 mt-1 italic max-w-[140px] truncate">
-                            "{rec.admin_notes}"
+                            &ldquo;{rec.admin_notes}&rdquo;
                           </p>
                         )}
                       </td>

@@ -477,7 +477,7 @@ export default function AffiliateModal() {
                             </div>
                             {w.admin_notes && (
                               <p className="text-[11px] italic text-gray-500 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
-                                📝 "{w.admin_notes}"
+                                📝 &ldquo;{w.admin_notes}&rdquo;
                               </p>
                             )}
                           </div>

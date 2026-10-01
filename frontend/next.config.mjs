@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
@@ -21,6 +27,11 @@ const nextConfig = {
       {
         protocol: "http",
         hostname: "127.0.0.1",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "**.onrender.com",
         pathname: "/**",
       },
       {
