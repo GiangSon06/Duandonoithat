@@ -157,14 +157,14 @@ function OrderSuccessContent() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
               <Link
                 href="/products"
-                className="w-full sm:w-auto px-8 py-3.5 bg-espresso text-beige text-xs tracking-widest2 uppercase hover:bg-gold transition-colors flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 bg-espresso text-beige text-sm font-medium tracking-wide rounded-lg hover:bg-gold hover:text-charcoal transition-all flex items-center justify-center gap-2 shadow-sm"
               >
-                Tiếp Tục Mua Sắm
-                <ArrowRight size={14} />
+                Tiếp Tục Khám Phá
+                <ArrowRight size={15} />
               </Link>
               <Link
                 href="/"
-                className="w-full sm:w-auto px-8 py-3.5 border border-espresso/20 text-espresso text-xs tracking-widest2 uppercase hover:border-gold hover:text-gold transition-colors"
+                className="w-full sm:w-auto px-8 py-3.5 border border-espresso/25 text-espresso text-sm font-medium tracking-wide rounded-lg hover:border-gold hover:text-gold transition-all flex items-center justify-center shadow-xs"
               >
                 Về Trang Chủ
               </Link>

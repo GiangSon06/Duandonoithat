@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -13,7 +13,7 @@ import { productService } from "@/services/api";
 import { useRouter } from "next/navigation";
 
 export default function WishlistPage() {
-  const { wishlist, toggleWishlist, addToCart, openCart } = useStore();
+  const { wishlist, toggleWishlist, addToCart, openCart, closeCart } = useStore();
   const { showToast } = useToast();
   const router = useRouter();
   const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
@@ -50,7 +50,8 @@ export default function WishlistPage() {
   };
 
   const handleBuyNow = (product: any) => {
-    addToCart(product);
+    closeCart();
+    addToCart(product, null, 1, false);
     router.push("/checkout");
   };
 

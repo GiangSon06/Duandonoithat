@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\Admin\AdminVoucherController;
 use App\Http\Controllers\Api\Admin\AdminFaqController;
 use App\Http\Controllers\Api\Admin\AdminCustomerController;
 use App\Http\Controllers\Api\Admin\AdminWithdrawalController;
+use App\Http\Controllers\Api\Admin\AdminConsultationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -39,6 +40,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
@@ -167,18 +170,24 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     // Tạo vận đơn GHN thật cho 1 đơn hàng đã xác nhận
     Route::post('/orders/create-ghn-shipping', [App\Http\Controllers\Api\Shipping\GhnController::class, 'createShippingOrder']);
 
-    // Product Management (CRUD)
+    // Product Management (CRUD & Quick Inventory Adjustment)
     Route::get('/products', [AdminProductController::class, 'index']);
     Route::post('/products', [AdminProductController::class, 'store']);
     Route::get('/products/{id}', [AdminProductController::class, 'show']);
     Route::put('/products/{id}', [AdminProductController::class, 'update']);
     Route::delete('/products/{id}', [AdminProductController::class, 'destroy']);
+    Route::post('/products/{id}/adjust-stock', [AdminProductController::class, 'adjustStock']);
     Route::post('/upload-image', [AdminProductController::class, 'uploadImage']);
 
     // Order Management & Fulfillment
     Route::get('/orders', [AdminOrderController::class, 'index']);
     Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
     Route::put('/orders/{id}/status', [AdminOrderController::class, 'updateStatus']);
+
+    // Consultation Leads Management
+    Route::get('/consultations', [AdminConsultationController::class, 'index']);
+    Route::patch('/consultations/{id}/status', [AdminConsultationController::class, 'updateStatus']);
+    Route::delete('/consultations/{id}', [AdminConsultationController::class, 'destroy']);
 
     // Voucher Management
     Route::get('/vouchers', [AdminVoucherController::class, 'index']);

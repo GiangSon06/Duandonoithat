@@ -222,7 +222,7 @@ export default function VirtualRoomStudio() {
                     cameraAngle === "sofa_close"
                       ? "/images/sofa-1.jpg"
                       : cameraAngle === "window"
-                        ? "/images/lookbook-dining.jpg"
+                        ? "/images/dining-table-1.jpg"
                         : "/images/hero-banner.jpg"
                   }
                   alt="3D Virtual Room Studio"

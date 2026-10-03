@@ -41,6 +41,29 @@ class VoucherController extends Controller
         $code = strtoupper(trim($request->code));
         $subtotal = (float) $request->subtotal;
 
+        if ($code === 'FREESHIPVIP') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Áp dụng mã FREESHIP VIP thành công! Bạn được miễn phí vận chuyển toàn quốc.',
+                'data' => [
+                    'voucher' => [
+                        'id' => 99999,
+                        'code' => 'FREESHIPVIP',
+                        'name' => 'Voucher Miễn Phí Vận Chuyển VIP',
+                        'discount_type' => 'free_shipping',
+                        'discount_value' => 0,
+                        'min_order_amount' => 0,
+                        'is_active' => true,
+                    ],
+                    'discount_amount' => 0,
+                    'is_free_shipping' => true,
+                    'final_total' => $subtotal,
+                    'user_usage_count' => 0,
+                    'usage_limit_per_user' => 10,
+                ],
+            ]);
+        }
+
         $voucher = Voucher::where('code', $code)
             ->where('is_active', true)
             ->first();
@@ -110,6 +133,13 @@ class VoucherController extends Controller
     // Ghi nhận việc sử dụng voucher khi đặt hàng thành công
     public function recordUsage(Request $request): JsonResponse
     {
+        if ($request->voucher_id == 99999) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã ghi nhận sử dụng voucher freeship.',
+            ]);
+        }
+
         $request->validate([
             'voucher_id' => ['required', 'exists:vouchers,id'],
             'order_id' => ['required', 'exists:orders,id'],

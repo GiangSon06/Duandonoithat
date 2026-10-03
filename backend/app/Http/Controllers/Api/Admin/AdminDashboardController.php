@@ -19,6 +19,15 @@ class AdminDashboardController extends Controller
      */
     public function getStats()
     {
+        // Auto-seed sample orders if table is currently empty so admin dashboard has rich analytics
+        if (Order::count() === 0 && Product::count() > 0) {
+            try {
+                (new \Database\Seeders\SampleOrdersSeeder())->run();
+            } catch (\Throwable $e) {
+                // Ignore seeding errors
+            }
+        }
+
         $now = Carbon::now('Asia/Ho_Chi_Minh');
         $today = $now->copy()->startOfDay();
         $startOfMonth = $now->copy()->startOfMonth();

@@ -34,21 +34,21 @@ const PRESET_ROOMS = [
     id: "penthouse_living",
     title: "Phòng Khách Penthouse",
     style: "Modern Italian Luxury",
-    image: "/images/hero-1.webp",
+    image: "/images/hero-banner.jpg",
     description: "Đại sảnh thông tầng, cửa kính panorama đón nắng và sàn đá tự nhiên.",
   },
   {
     id: "scandi_apartment",
     title: "Căn Hộ Chung Cư",
     style: "Warm Scandinavian & Japandi",
-    image: "/images/hero-2.webp",
+    image: "/images/sofa-3.jpg",
     description: "Không gian mở ấm cúng, tối ưu diện tích và ánh sáng ban công.",
   },
   {
     id: "master_bedroom",
     title: "Phòng Ngủ Master",
     style: "Contemporary Serene",
-    image: "/images/hero-3.webp",
+    image: "/images/bed-1.jpg",
     description: "Phòng ngủ lớn tiện nghi cao cấp, tông màu tĩnh tại thư giãn.",
   },
   {
@@ -68,6 +68,9 @@ export default function AiRoomStylistPage() {
   const [selectedPreset, setSelectedPreset] = useState("penthouse_living");
   const [customImage, setCustomImage] = useState<string | null>(null);
   const [userPrompt, setUserPrompt] = useState("");
+  const [roomArea, setRoomArea] = useState("35");
+  const [colorTone, setColorTone] = useState("Tone Da Bò Cognac & Đá Marble Sáng");
+  const [desiredStyle, setDesiredStyle] = useState("Modern Luxury");
 
   const [isScanning, setIsScanning] = useState(false);
   const [scanStep, setScanStep] = useState(0);
@@ -110,6 +113,10 @@ export default function AiRoomStylistPage() {
       const payload: any = {
         preset_id: activeTab === "preset" ? selectedPreset : "penthouse_living",
         prompt: userPrompt,
+        area: roomArea,
+        color_tone: colorTone,
+        desired_style: desiredStyle,
+        user_note: userPrompt,
       };
 
       if (activeTab === "upload" && customImage) {
@@ -332,18 +339,68 @@ export default function AiRoomStylistPage() {
               </div>
             )}
 
-            {/* Optional Architect Note Input */}
-            <div className="pt-2">
-              <label className="block text-[11px] uppercase tracking-widest2 text-beige/60 mb-2">
-                Yêu cầu kiến trúc bổ sung (Tùy chọn)
-              </label>
-              <input
-                type="text"
-                value={userPrompt}
-                onChange={(e) => setUserPrompt(e.target.value)}
-                placeholder="Ví dụ: Cần sofa da màu nâu cognac, phong cách Wabi-Sabi, nhà có nuôi mèo..."
-                className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-xs text-beige placeholder:text-beige/30 focus:outline-none focus:border-gold transition-colors"
-              />
+            {/* User Customization Parameters */}
+            <div className="pt-2 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-beige/80 mb-1.5 normal-case tracking-normal">
+                    Diện tích phòng (m²)
+                  </label>
+                  <input
+                    type="number"
+                    min="10"
+                    max="300"
+                    value={roomArea}
+                    onChange={(e) => setRoomArea(e.target.value)}
+                    placeholder="Ví dụ: 35"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-beige placeholder:text-beige/30 focus:outline-none focus:border-gold transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-beige/80 mb-1.5 normal-case tracking-normal">
+                    Phong cách thiết kế
+                  </label>
+                  <select
+                    value={desiredStyle}
+                    onChange={(e) => setDesiredStyle(e.target.value)}
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-beige focus:outline-none focus:border-gold transition-colors [&>option]:bg-charcoal [&>option]:text-beige"
+                  >
+                    <option value="Modern Italian Luxury">Modern Italian Luxury (Ý Sang Trọng)</option>
+                    <option value="Warm Scandinavian & Japandi">Bắc Âu Tối Giản & Japandi</option>
+                    <option value="Contemporary Serene">Contemporary Đương Đại Tĩnh Lặng</option>
+                    <option value="Neoclassic Luxury">Tân Cổ Điển Hoàng Gia</option>
+                    <option value="Indochine Heritage">Đông Dương Sang Trọng (Indochine)</option>
+                    <option value="Minimalist Wabi-Sabi">Tối Giản Mộc Wabi-Sabi</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-beige/80 mb-1.5 normal-case tracking-normal">
+                    Tông màu mong muốn
+                  </label>
+                  <input
+                    type="text"
+                    value={colorTone}
+                    onChange={(e) => setColorTone(e.target.value)}
+                    placeholder="VD: Da bò cognac, kem oatmeal, xám than..."
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-beige placeholder:text-beige/30 focus:outline-none focus:border-gold transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-beige/80 mb-1.5 normal-case tracking-normal">
+                  Yêu cầu kiến trúc sư & công năng bổ sung (Tùy chọn)
+                </label>
+                <input
+                  type="text"
+                  value={userPrompt}
+                  onChange={(e) => setUserPrompt(e.target.value)}
+                  placeholder="Ví dụ: Cần bàn trà đá cẩm thạch sáng, phòng nhiều nắng hướng Tây, nhà có trẻ nhỏ..."
+                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-xs text-beige placeholder:text-beige/30 focus:outline-none focus:border-gold transition-colors"
+                />
+              </div>
             </div>
 
             {/* Trigger Button */}

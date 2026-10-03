@@ -306,6 +306,10 @@ PROMPT;
     {
         $presetId = $request->input('preset_id', $request->input('preset', 'penthouse_living'));
         $customPrompt = $request->input('prompt', '');
+        $area = $request->input('area');
+        $colorTone = $request->input('color_tone');
+        $desiredStyle = $request->input('desired_style');
+        $userNote = $request->input('user_note', $customPrompt);
         $imageFile = $request->file('image');
         $imageBase64 = $request->input('image_base64');
 
@@ -375,6 +379,21 @@ PROMPT;
 
         $selectedPreset = $presets[$presetId] ?? $presets['penthouse_living'];
 
+        // Apply user-specified preferences if provided
+        if (!empty($area)) {
+            $selectedPreset['area'] = trim($area) . ' m²';
+        }
+        if (!empty($desiredStyle)) {
+            $selectedPreset['style'] = $desiredStyle;
+            $selectedPreset['title'] = "Không Gian " . $desiredStyle;
+        }
+        if (!empty($colorTone)) {
+            $selectedPreset['advice'] = "Không gian được thiết kế nhấn mạnh tông màu {$colorTone}. " . $selectedPreset['advice'];
+        }
+        if (!empty($userNote)) {
+            $selectedPreset['advice'] .= " Ghi chú cá nhân: {$userNote}";
+        }
+
         // If user uploaded an image and Gemini is available, attempt multimodal vision analysis
         if (($imageFile || $imageBase64) && $this->gemini->isConfigured()) {
             try {
@@ -393,7 +412,8 @@ PROMPT;
                 }
 
                 if (!empty($base64Data)) {
-                    $visionPrompt = "Bạn là Giám đốc Kiến trúc GS Luxury. Hãy phân tích bức ảnh phòng này và trả về JSON:
+                    $userContextStr = "Thông tin khách hàng cung cấp: Diện tích: " . ($area ? $area . 'm²' : 'chưa xác định') . ", Tông màu: " . ($colorTone ?: 'tự do') . ", Phong cách: " . ($desiredStyle ?: 'hiện đại') . ", Ghi chú: " . ($userNote ?: 'không có');
+                    $visionPrompt = "Bạn là Giám đốc Kiến trúc GS Luxury. Hãy phân tích bức ảnh phòng này kết hợp thông tin sau: {$userContextStr}. Trả về JSON:
                     {
                       \"detected_room_type\": \"Tên loại phòng (vd: Phòng Khách Căn Hộ)\",
                       \"detected_style\": \"Tên phong cách (vd: Modern Luxury / Scandinavian)\",
@@ -408,8 +428,8 @@ PROMPT;
                         $parsed = $this->parseGeminiResponse($geminiRes['text']);
                         if ($parsed && isset($parsed['detected_style'])) {
                             $selectedPreset['title'] = $parsed['detected_room_type'] ?? $selectedPreset['title'];
-                            $selectedPreset['style'] = $parsed['detected_style'] ?? $selectedPreset['style'];
-                            $selectedPreset['area'] = $parsed['estimated_area'] ?? $selectedPreset['area'];
+                            $selectedPreset['style'] = $desiredStyle ?: ($parsed['detected_style'] ?? $selectedPreset['style']);
+                            $selectedPreset['area'] = $area ? ($area . ' m²') : ($parsed['estimated_area'] ?? $selectedPreset['area']);
                             $selectedPreset['lighting'] = $parsed['lighting_analysis'] ?? $selectedPreset['lighting'];
                             $selectedPreset['advice'] = $parsed['architect_advice'] ?? $selectedPreset['advice'];
                             if (!empty($parsed['color_palette'])) {
@@ -451,7 +471,7 @@ PROMPT;
                 'category' => $p->category?->name ?? 'Nội Thất Cao Cấp',
                 'material' => $p->material ?? 'Vật liệu nhập khẩu cao cấp',
                 'dimensions' => $p->dimensions ?? 'Tiêu chuẩn quốc tế',
-                'image' => ($p->images->first()?->image_url) ?? '/images/hero-1.webp',
+                'image' => ($p->images->first()?->image_url) ?? '/images/hero-banner.jpg',
                 'role' => $roles[$idx] ?? 'Phối kiện hoàn hảo',
                 'reason' => "Tương thích 98% với phong cách {$selectedPreset['style']}, tôn vinh đường nét kiến trúc.",
             ];

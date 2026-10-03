@@ -15,6 +15,7 @@ import {
   Sparkles,
   Upload,
   Loader2,
+  Boxes,
 } from "lucide-react";
 import { adminService, catalogService, ApiProduct, ApiCategory } from "@/services/api";
 import { formatPrice } from "@/lib/products";
@@ -25,6 +26,15 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+
+  // Stock Adjustment State
+  const [stockModalOpen, setStockModalOpen] = useState(false);
+  const [stockProduct, setStockProduct] = useState<ApiProduct | null>(null);
+  const [stockType, setStockType] = useState<"import" | "export" | "set">("import");
+  const [stockQty, setStockQty] = useState<number>(10);
+  const [stockReason, setStockReason] = useState("");
+  const [stockSubmitting, setStockSubmitting] = useState(false);
+  const [stockMsg, setStockMsg] = useState("");
 
   // Modal State for Create / Edit
   const [modalOpen, setModalOpen] = useState(false);
@@ -193,6 +203,43 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleOpenStockModal = (product: ApiProduct) => {
+    setStockProduct(product);
+    setStockType("import");
+    setStockQty(10);
+    setStockReason("");
+    setStockMsg("");
+    setStockModalOpen(true);
+  };
+
+  const handleStockSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stockProduct) return;
+    if (stockQty <= 0 && stockType !== "set") {
+      setStockMsg("Số lượng phải lớn hơn 0");
+      return;
+    }
+    setStockSubmitting(true);
+    setStockMsg("");
+    try {
+      const res = await adminService.adjustProductStock(stockProduct.id, {
+        type: stockType,
+        quantity: stockQty,
+        reason: stockReason || undefined,
+      });
+      if (res.success) {
+        setStockModalOpen(false);
+        loadData();
+      } else {
+        setStockMsg(res.message || "Không thể cập nhật tồn kho");
+      }
+    } catch (err: any) {
+      setStockMsg(err.message || "Lỗi cập nhật tồn kho");
+    } finally {
+      setStockSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Bar */}
@@ -300,6 +347,13 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="p-4 text-beige/60 font-medium">{p.sold_count || 0}</td>
                       <td className="p-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleOpenStockModal(p)}
+                          className="p-1.5 bg-white/5 hover:bg-emerald-600 hover:text-white transition-colors rounded text-beige/70"
+                          title="Nhập / Xuất Kho Nhanh"
+                        >
+                          <Boxes size={14} />
+                        </button>
                         <button
                           onClick={() => handleOpenEdit(p)}
                           className="p-1.5 bg-white/5 hover:bg-gold hover:text-charcoal transition-colors rounded text-beige/70"
@@ -556,6 +610,140 @@ export default function AdminProductsPage() {
                   className="px-6 py-2.5 bg-gold text-charcoal font-semibold text-xs uppercase tracking-wider hover:bg-champagne transition-colors rounded disabled:opacity-50"
                 >
                   {saving ? "Đang Lưu..." : "Lưu Sản Phẩm"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Stock Adjustment Modal */}
+      {stockModalOpen && stockProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-espresso border border-gold/40 rounded-xl w-full max-w-md p-6 text-beige shadow-2xl space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <h3 className="font-serif text-lg text-champagne flex items-center gap-2">
+                <Boxes size={18} className="text-gold" />
+                Điều Chỉnh Kho Nhanh
+              </h3>
+              <button
+                onClick={() => setStockModalOpen(false)}
+                className="p-1 text-beige/50 hover:text-beige"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="bg-black/40 p-3 rounded border border-white/10 flex items-center gap-3">
+              <div className="relative w-12 h-12 rounded overflow-hidden flex-shrink-0 bg-charcoal">
+                <Image
+                  src={stockProduct.image_url || "/images/sofa-1.jpg"}
+                  alt={stockProduct.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="text-xs font-semibold text-beige truncate">{stockProduct.name}</h4>
+                <p className="text-[11px] text-beige/60 mt-0.5">
+                  Tồn kho hiện tại: <span className="font-bold text-gold">{stockProduct.stock_quantity} cái</span>
+                </p>
+              </div>
+            </div>
+
+            {stockMsg && (
+              <div className="p-2.5 bg-red-900/40 border border-red-500/50 text-red-200 text-xs rounded">
+                {stockMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleStockSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-beige/80 mb-1.5">
+                  Thao Tác Kho
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStockType("import")}
+                    className={`py-2 px-2 text-xs font-medium rounded border text-center transition-all ${
+                      stockType === "import"
+                        ? "bg-emerald-600/30 border-emerald-500 text-emerald-300 font-semibold"
+                        : "bg-black/30 border-white/10 text-beige/70 hover:bg-white/5"
+                    }`}
+                  >
+                    + Nhập Kho
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStockType("export")}
+                    className={`py-2 px-2 text-xs font-medium rounded border text-center transition-all ${
+                      stockType === "export"
+                        ? "bg-amber-600/30 border-amber-500 text-amber-300 font-semibold"
+                        : "bg-black/30 border-white/10 text-beige/70 hover:bg-white/5"
+                    }`}
+                  >
+                    - Xuất Kho
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStockType("set")}
+                    className={`py-2 px-2 text-xs font-medium rounded border text-center transition-all ${
+                      stockType === "set"
+                        ? "bg-blue-600/30 border-blue-500 text-blue-300 font-semibold"
+                        : "bg-black/30 border-white/10 text-beige/70 hover:bg-white/5"
+                    }`}
+                  >
+                    = Cài Lại
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-beige/80 mb-1.5">
+                  {stockType === "import"
+                    ? "Số lượng nhập thêm"
+                    : stockType === "export"
+                    ? "Số lượng xuất bớt"
+                    : "Đặt lại tồn kho thành"}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  required
+                  value={stockQty}
+                  onChange={(e) => setStockQty(parseInt(e.target.value) || 0)}
+                  className="w-full bg-black/40 border border-white/15 px-3 py-2 text-sm text-beige font-mono focus:outline-none focus:border-gold rounded"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-beige/80 mb-1.5">
+                  Lý Do / Ghi Chú (Tùy chọn)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Vd: Nhập lô xưởng mới, xuất showroom trưng bày..."
+                  value={stockReason}
+                  onChange={(e) => setStockReason(e.target.value)}
+                  className="w-full bg-black/40 border border-white/15 px-3 py-2 text-xs text-beige focus:outline-none focus:border-gold rounded"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setStockModalOpen(false)}
+                  className="px-4 py-2 border border-white/20 text-xs rounded hover:bg-white/5"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="submit"
+                  disabled={stockSubmitting}
+                  className="px-5 py-2 bg-gold text-charcoal font-semibold text-xs rounded hover:bg-champagne transition-colors disabled:opacity-50"
+                >
+                  {stockSubmitting ? "Đang cập nhật..." : "Xác Nhận Kho"}
                 </button>
               </div>
             </form>

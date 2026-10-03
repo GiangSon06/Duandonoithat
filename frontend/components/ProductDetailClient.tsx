@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Heart,
@@ -17,6 +18,7 @@ import {
   Send,
   Sparkles,
   ThumbsUp,
+  Zap,
 } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 import { useStore } from "./StoreContext";
@@ -27,7 +29,8 @@ import ShoppableRoomBundle from "./ShoppableRoomBundle";
 import RealCustomerReviews from "./RealCustomerReviews";
 
 export default function ProductDetailClient({ product }: { product: any }) {
-  const { wishlist, toggleWishlist, addToCart, addToCompare, comparisonList } = useStore();
+  const { wishlist, toggleWishlist, addToCart, addToCompare, comparisonList, closeCart } = useStore();
+  const router = useRouter();
   const prodId = String(product.id);
   const isWished = wishlist.includes(prodId);
   const isCompared = comparisonList.some((p) => String(p.id) === prodId);
@@ -124,6 +127,12 @@ export default function ProductDetailClient({ product }: { product: any }) {
     addToCart(product, selectedVariant, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    closeCart();
+    addToCart(product, selectedVariant, quantity, false);
+    router.push("/checkout");
   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
@@ -492,6 +501,15 @@ export default function ProductDetailClient({ product }: { product: any }) {
                   />
                 </button>
               </div>
+
+              {/* Direct Buy Now Button */}
+              <button
+                onClick={handleBuyNow}
+                className="w-full mt-2.5 py-3.5 bg-gradient-to-r from-gold via-amber-400 to-gold text-charcoal font-serif font-bold text-xs tracking-wider uppercase hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-2 rounded-lg shadow-md"
+              >
+                <Zap size={16} />
+                <span>Mua Ngay — Nhận Hàng Nhanh</span>
+              </button>
             </div>
 
             {/* Thông số kỹ thuật & Cam kết */}

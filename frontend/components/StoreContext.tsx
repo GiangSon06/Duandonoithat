@@ -42,7 +42,7 @@ type StoreContextValue = {
   cart: CartItemType[];
   wishlist: string[];
   isCartOpen: boolean;
-  addToCart: (product: any, variant?: any, quantity?: number) => void;
+  addToCart: (product: any, variant?: any, quantity?: number, openDrawer?: boolean) => void;
   removeFromCart: (productId: number | string, variantId?: number | null) => void;
   updateQuantity: (productId: number | string, quantity: number, variantId?: number | null) => void;
   clearCart: () => void;
@@ -69,6 +69,7 @@ type StoreContextValue = {
 
   // Gamification & Coins
   userCoins: number;
+  setUserCoins: React.Dispatch<React.SetStateAction<number>>;
   addCoins: (amount: number) => void;
   useCoins: boolean;
   setUseCoins: (use: boolean) => void;
@@ -91,9 +92,9 @@ type StoreContextValue = {
   token: string | null;
   isAuthenticated: boolean;
   isAuthOpen: boolean;
-  authMode: "login" | "register";
+  authMode: "login" | "register" | "forgot";
   isAuthLoading: boolean;
-  openAuth: (mode?: "login" | "register") => void;
+  openAuth: (mode?: "login" | "register" | "forgot") => void;
   closeAuth: () => void;
   loginUser: (data: { email: string; password: string }) => Promise<{ success: boolean; message?: string }>;
   registerUser: (data: {
@@ -137,7 +138,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<ApiUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isAuthOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authMode, setAuthMode] = useState<"login" | "register" | "forgot">("login");
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   // Load initial localStorage on mount
@@ -220,55 +221,60 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [userCoins]);
 
   // Cart operations
-  const addToCart = useCallback((product: any, variant?: any, quantity: number = 1) => {
-    const prodId = product.id;
-    const variantId = variant?.id || null;
-    const price = variant?.price || product.price;
-    const image = variant?.image_url || product.images?.[0]?.image_url || product.image || "/images/sofa-1.jpg";
+  const addToCart = useCallback(
+    (product: any, variant?: any, quantity: number = 1, openDrawer: boolean = true) => {
+      const prodId = product.id;
+      const variantId = variant?.id || null;
+      const price = variant?.price || product.price;
+      const image = variant?.image_url || product.images?.[0]?.image_url || product.image || "/images/sofa-1.jpg";
 
-    setCart((prev) => {
-      const existingIndex = prev.findIndex(
-        (line) =>
-          String(line.product.id) === String(prodId) &&
-          (line.variant?.id || null) === variantId
-      );
+      setCart((prev) => {
+        const existingIndex = prev.findIndex(
+          (line) =>
+            String(line.product.id) === String(prodId) &&
+            (line.variant?.id || null) === variantId
+        );
 
-      if (existingIndex > -1) {
-        const updated = [...prev];
-        updated[existingIndex] = {
-          ...updated[existingIndex],
-          quantity: updated[existingIndex].quantity + quantity,
-        };
-        return updated;
-      }
+        if (existingIndex > -1) {
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            quantity: updated[existingIndex].quantity + quantity,
+          };
+          return updated;
+        }
 
-      return [
-        ...prev,
-        {
-          product: {
-            id: prodId,
-            name: product.name,
-            price: price,
-            image: image,
-            category: product.category?.name || product.category || "",
+        return [
+          ...prev,
+          {
+            product: {
+              id: prodId,
+              name: product.name,
+              price: price,
+              image: image,
+              category: product.category?.name || product.category || "",
+            },
+            variant: variant
+              ? {
+                  id: variant.id,
+                  name: variant.name,
+                  price: variant.price,
+                  color_name: variant.color_name,
+                  color_hex: variant.color_hex,
+                  image_url: variant.image_url,
+                }
+              : null,
+            quantity: quantity,
           },
-          variant: variant
-            ? {
-                id: variant.id,
-                name: variant.name,
-                price: variant.price,
-                color_name: variant.color_name,
-                color_hex: variant.color_hex,
-                image_url: variant.image_url,
-              }
-            : null,
-          quantity: quantity,
-        },
-      ];
-    });
+        ];
+      });
 
-    setCartOpen(true);
-  }, []);
+      if (openDrawer) {
+        setCartOpen(true);
+      }
+    },
+    []
+  );
 
   const removeFromCart = useCallback((productId: number | string, variantId?: number | null) => {
     setCart((prev) =>
@@ -382,7 +388,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const closeWheel = useCallback(() => setWheelOpen(false), []);
 
   // Auth Operations
-  const openAuth = useCallback((mode: "login" | "register" = "login") => {
+  const openAuth = useCallback((mode: "login" | "register" | "forgot" = "login") => {
     setAuthMode(mode);
     setAuthOpen(true);
   }, []);
@@ -503,6 +509,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     removeVoucher,
 
     userCoins,
+    setUserCoins,
     addCoins,
     useCoins,
     setUseCoins,

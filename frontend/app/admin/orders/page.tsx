@@ -163,9 +163,30 @@ export default function AdminOrdersPage() {
                     <td className="p-4 text-beige/60">
                       {new Date(order.created_at).toLocaleDateString("vi-VN")}
                     </td>
-                    <td className="p-4">
-                      <p className="font-medium text-champagne">{order.customer_name}</p>
-                      <span className="text-[11px] text-beige/50">{order.customer_phone}</span>
+                    <td className="p-4 align-top">
+                      <p className="font-semibold text-champagne">{order.customer_name}</p>
+                      {order.customer_phone && (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <a
+                            href={`tel:${order.customer_phone}`}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-mono text-[11px] hover:bg-emerald-500/25 transition-colors"
+                          >
+                            <Phone size={10} />
+                            <span>{order.customer_phone}</span>
+                          </a>
+                        </div>
+                      )}
+                      {order.shipping_address && (
+                        <div className="flex items-start gap-1 text-[11px] text-beige/60 mt-1 max-w-xs">
+                          <MapPin size={11} className="shrink-0 mt-0.5 text-amber-500" />
+                          <span className="line-clamp-2">{order.shipping_address}, {order.shipping_city}</span>
+                        </div>
+                      )}
+                      {order.notes && (
+                        <p className="text-[10px] text-beige/40 italic mt-0.5 line-clamp-1">
+                          Ghi chú: {order.notes}
+                        </p>
+                      )}
                     </td>
                     <td className="p-4 text-beige/70">
                       {order.items?.length || 1} sản phẩm

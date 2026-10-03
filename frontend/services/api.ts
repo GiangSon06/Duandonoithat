@@ -251,6 +251,21 @@ export type ConsultationPayload = {
   notes?: string;
 };
 
+export type AdminConsultation = {
+  id: number;
+  full_name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  preferred_date?: string;
+  space_type?: string;
+  budget_range?: string;
+  message?: string;
+  status: "new" | "contacted" | "scheduled" | "completed" | "cancelled";
+  created_at: string;
+  updated_at: string;
+};
+
 export type CreateOrderPayload = {
   customer_name: string;
   customer_email: string;
@@ -449,6 +464,27 @@ export const authService = {
       body: JSON.stringify(data),
     });
     return result as ApiResponse<{ user: ApiUser }>;
+  },
+
+  async forgotPassword(email: string): Promise<ApiResponse<null>> {
+    const result = await request<null>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    return result as ApiResponse<null>;
+  },
+
+  async resetPassword(data: {
+    email: string;
+    token?: string;
+    password: string;
+    password_confirmation: string;
+  }): Promise<ApiResponse<null>> {
+    const result = await request<null>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    return result as ApiResponse<null>;
   },
 
   async logout(): Promise<ApiResponse<null>> {
@@ -833,6 +869,48 @@ export const adminService = {
     });
     return result as ApiResponse<any>;
   },
+
+  // Stock Adjustment
+  async adjustProductStock(
+    id: number | string,
+    payload: { type: "import" | "export" | "set"; quantity: number; variant_id?: number | string; reason?: string }
+  ): Promise<ApiResponse<any>> {
+    const result = await request<any>(`/admin/products/${id}/adjust-stock`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return result as ApiResponse<any>;
+  },
+
+  // Consultation Leads Management
+  async getConsultations(params?: { status?: string; search?: string; page?: number; per_page?: number }): Promise<ApiResponse<AdminConsultation[]>> {
+    const query = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && val !== null && val !== "") {
+          query.append(key, String(val));
+        }
+      });
+    }
+    const qs = query.toString() ? `?${query.toString()}` : "";
+    const result = await request<AdminConsultation[]>(`/admin/consultations${qs}`, { cache: "no-store" });
+    return result as ApiResponse<AdminConsultation[]>;
+  },
+
+  async updateConsultationStatus(id: number | string, status: string, admin_notes?: string): Promise<ApiResponse<AdminConsultation>> {
+    const result = await request<AdminConsultation>(`/admin/consultations/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status, admin_notes }),
+    });
+    return result as ApiResponse<AdminConsultation>;
+  },
+
+  async deleteConsultation(id: number | string): Promise<ApiResponse<null>> {
+    const result = await request<null>(`/admin/consultations/${id}`, {
+      method: "DELETE",
+    });
+    return result as ApiResponse<null>;
+  },
 };
 
 // ==========================================
@@ -1049,6 +1127,9 @@ export const aiRoomStylistService = {
     preset_id?: string;
     prompt?: string;
     image_base64?: string;
+    area?: string | number;
+    color_tone?: string;
+    desired_style?: string;
   }): Promise<ApiResponse<AiRoomAnalysisResult>> {
     const result = await request<AiRoomAnalysisResult>("/visual-search/analyze-room", {
       method: "POST",

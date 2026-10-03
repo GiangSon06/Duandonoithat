@@ -17,6 +17,7 @@ import {
   X,
   Lock,
   Handshake,
+  PhoneCall,
 } from "lucide-react";
 import { useStore } from "@/components/StoreContext";
 
@@ -24,6 +25,7 @@ const ADMIN_NAV = [
   { label: "Tổng Quan", href: "/admin", icon: LayoutDashboard },
   { label: "Sản Phẩm", href: "/admin/products", icon: Package },
   { label: "Đơn Hàng", href: "/admin/orders", icon: ShoppingBag },
+  { label: "Yêu Cầu Tư Vấn", href: "/admin/consultations", icon: PhoneCall },
   { label: "Mã Giảm Giá", href: "/admin/vouchers", icon: Ticket },
   { label: "Hỏi Đáp Q&A", href: "/admin/faqs", icon: HelpCircle },
   { label: "Khách Hàng", href: "/admin/customers", icon: Users },

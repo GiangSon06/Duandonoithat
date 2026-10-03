@@ -18,14 +18,15 @@ export default function ProductCard({
   product: any;
   className?: string;
 }) {
-  const { wishlist, toggleWishlist, addToCart, addToCompare, comparisonList, openCart } = useStore();
+  const { wishlist, toggleWishlist, addToCart, addToCompare, comparisonList, openCart, closeCart } = useStore();
   const router = useRouter();
   const [modal3DOpen, setModal3DOpen] = useState(false);
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product);
+    closeCart();
+    addToCart(product, null, 1, false);
     router.push("/checkout");
   };
 

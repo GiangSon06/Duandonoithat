@@ -66,6 +66,7 @@ export default function CheckoutPage() {
     coinsDiscount,
     referralCode,
     openAuth,
+    setUserCoins,
   } = useStore();
 
   // State declarations - MUST be at top level for React hooks rules
@@ -129,12 +130,30 @@ export default function CheckoutPage() {
     voucherService
       .getVouchers()
       .then((res) => {
-        if (res.success && res.data) {
-          setAvailableVouchers(res.data);
-        }
+        const vipFreeship: ApiVoucher = {
+          id: 99999,
+          code: "FREESHIPVIP",
+          name: "Voucher Miễn Phí Vận Chuyển VIP (Vòng Quay May Mắn)",
+          discount_type: "free_shipping",
+          discount_value: 0,
+          min_order_amount: 0,
+          is_active: true,
+        };
+        const list = res.success && res.data ? res.data : [];
+        setAvailableVouchers([vipFreeship, ...list.filter((v: any) => v.code !== "FREESHIPVIP")]);
       })
       .catch(() => {
-        // ignore
+        setAvailableVouchers([
+          {
+            id: 99999,
+            code: "FREESHIPVIP",
+            name: "Voucher Miễn Phí Vận Chuyển VIP (Vòng Quay May Mắn)",
+            discount_type: "free_shipping",
+            discount_value: 0,
+            min_order_amount: 0,
+            is_active: true,
+          },
+        ]);
       });
   }, []);
 
@@ -347,13 +366,13 @@ export default function CheckoutPage() {
     setVoucherSuccess("");
 
     try {
-      const res = await voucherService.applyVoucher(voucherInput, cartSubtotal);
-      if (res.success && res.data) {
-        setVoucherSuccess(res.message || "Áp dụng voucher thành công");
-        showToast({ type: "success", title: "Thành công", message: res.message || "Áp dụng voucher thành công" });
+      const res = await applyVoucherCode(voucherInput.trim().toUpperCase());
+      if (res.success) {
+        setVoucherSuccess(res.message);
+        showToast({ type: "success", title: "Thành công", message: res.message });
       } else {
-        setVoucherError(res.message || "Mã không hợp lệ");
-        showToast({ type: "error", title: "Không thể áp dụng", message: res.message || "Mã giảm giá không hợp lệ" });
+        setVoucherError(res.message);
+        showToast({ type: "error", title: "Không thể áp dụng", message: res.message });
       }
     } catch {
       setVoucherError("Có lỗi xảy ra, vui lòng thử lại");
@@ -370,6 +389,11 @@ export default function CheckoutPage() {
     setVoucherError("");
     showToast({ type: "info", title: "Đã xóa", message: "Đã xóa mã giảm giá" });
   };
+
+  const isFreeShipping = appliedVoucher?.code === "FREESHIPVIP" || appliedVoucher?.discount_type === "free_shipping";
+  const effectiveShippingFee = isFreeShipping ? 0 : shippingFee;
+  const coinsToUse = useCoins ? Math.min(userCoins, Math.floor(coinsDiscount / 1000)) : 0;
+  const totalAmount = Math.max(0, cartSubtotal + effectiveShippingFee - discountAmount - coinsDiscount);
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -402,8 +426,6 @@ export default function CheckoutPage() {
     try {
       setLoading(true);
 
-      const coinsToUse = useCoins ? Math.min(userCoins, Math.floor(coinsDiscount / 1000)) : 0;
-
       // Call Backend API
       const payload = {
         customer_name: formData.customer_name,
@@ -417,7 +439,7 @@ export default function CheckoutPage() {
         shipping_district_id: formData.shipping_district_id || undefined,
         shipping_ward_code: formData.shipping_ward_code || undefined,
         shipping_method: formData.shipping_method,
-        shipping_fee: shippingFee,
+        shipping_fee: effectiveShippingFee,
         notes: formData.notes,
         payment_method: formData.payment_method,
         voucher_code: appliedVoucher?.code || undefined,
@@ -447,6 +469,10 @@ export default function CheckoutPage() {
         }
         const order = res.data.order;
         const orderNumber = order.order_number;
+
+        if (useCoins && coinsToUse > 0) {
+          setUserCoins((prev) => Math.max(0, prev - coinsToUse));
+        }
 
         // If payment method is MoMo, redirect to MoMo payUrl
         if (formData.payment_method === "momo") {
@@ -479,7 +505,7 @@ export default function CheckoutPage() {
         // For other payment methods (COD, bank_transfer)
         clearCart();
         router.push(
-          `/order-success/${orderNumber}?method=${formData.payment_method}&amount=${shippingFee + cartSubtotal - discountAmount}`
+          `/order-success/${orderNumber}?method=${formData.payment_method}&amount=${totalAmount}`
         );
       } else {
         throw new Error(res.message || "Không thể tạo đơn hàng");
@@ -495,9 +521,6 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
-
-  const coinsToUse = useCoins ? Math.min(userCoins, Math.floor(coinsDiscount / 1000)) : 0;
-  const totalAmount = cartSubtotal + shippingFee - discountAmount - coinsDiscount;
 
   return (
     <main className="min-h-screen bg-[#faf8f5] text-neutral-800">
@@ -576,7 +599,7 @@ export default function CheckoutPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5">
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-medium text-neutral-700 mb-2 uppercase tracking-wider">
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-1.5 normal-case tracking-normal">
                         <User size={13} className="text-amber-600" />
                         Họ và Tên <span className="text-red-500">*</span>
                       </label>
@@ -592,7 +615,7 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-medium text-neutral-700 mb-2 uppercase tracking-wider">
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-1.5 normal-case tracking-normal">
                         <Mail size={13} className="text-amber-600" />
                         Địa Chỉ Email
                       </label>
@@ -607,7 +630,7 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-medium text-neutral-700 mb-2 uppercase tracking-wider">
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-1.5 normal-case tracking-normal">
                         <Phone size={13} className="text-amber-600" />
                         Số Điện Thoại <span className="text-red-500">*</span>
                       </label>
@@ -623,7 +646,7 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-medium text-neutral-700 mb-2 uppercase tracking-wider">
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-1.5 normal-case tracking-normal">
                         <Building2 size={13} className="text-neutral-400" />
                         Mã Số Thuế (Nếu Cần VAT)
                       </label>
@@ -663,7 +686,7 @@ export default function CheckoutPage() {
                     {/* 3 Selects: Tỉnh / Quận / Phường */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-neutral-700 mb-2 uppercase tracking-wider">
+                        <label className="block text-xs font-semibold text-neutral-800 mb-1.5 normal-case tracking-normal">
                           Tỉnh / Thành Phố <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
@@ -685,7 +708,7 @@ export default function CheckoutPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-neutral-700 mb-2 uppercase tracking-wider">
+                        <label className="block text-xs font-semibold text-neutral-800 mb-1.5 normal-case tracking-normal">
                           Quận / Huyện <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
@@ -708,7 +731,7 @@ export default function CheckoutPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-neutral-700 mb-2 uppercase tracking-wider">
+                        <label className="block text-xs font-semibold text-neutral-800 mb-1.5 normal-case tracking-normal">
                           Phường / Xã <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
@@ -732,7 +755,7 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-medium text-neutral-700 mb-2 uppercase tracking-wider">
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-1.5 normal-case tracking-normal">
                         <MapPin size={13} className="text-amber-600" />
                         Địa Chỉ Chi Tiết (Số nhà, Tên đường, Căn hộ/Tòa nhà) <span className="text-red-500">*</span>
                       </label>
@@ -748,7 +771,7 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-medium text-neutral-700 mb-2 uppercase tracking-wider">
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-1.5 normal-case tracking-normal">
                         <FileText size={13} className="text-neutral-400" />
                         Ghi Chú Đơn Hàng / Yêu Cầu Lắp Đặt
                       </label>
@@ -764,7 +787,7 @@ export default function CheckoutPage() {
 
                     {/* Shipping Method Options */}
                     <div className="pt-4 border-t border-neutral-100">
-                      <label className="block text-xs font-medium text-neutral-700 mb-3 uppercase tracking-wider">
+                      <label className="block text-xs font-semibold text-neutral-800 mb-2 normal-case tracking-normal">
                         Gói Vận Chuyển & Lắp Đặt Nội Thất (GHN Express)
                       </label>
                       <div className="space-y-3">
@@ -1062,10 +1085,13 @@ export default function CheckoutPage() {
                     <div className="flex justify-between text-neutral-600">
                       <span>Phí vận chuyển & lắp đặt</span>
                       <span className="font-medium text-neutral-800">
-                        {shippingFee === 0 ? (
-                          <span className="text-emerald-700 font-semibold">MIỄN PHÍ</span>
+                        {effectiveShippingFee === 0 ? (
+                          <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                            <Sparkles size={12} className="text-amber-500" />
+                            MIỄN PHÍ {isFreeShipping ? "(FREESHIP VIP)" : ""}
+                          </span>
                         ) : (
-                          formatPrice(shippingFee)
+                          formatPrice(effectiveShippingFee)
                         )}
                       </span>
                     </div>
@@ -1084,7 +1110,7 @@ export default function CheckoutPage() {
                   {/* Voucher Section */}
                   <div className="pt-4 border-t border-neutral-100">
                     <div className="flex items-center justify-between mb-2">
-                      <label className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700 uppercase tracking-wider">
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 normal-case tracking-normal">
                         <BadgePercent size={14} className="text-amber-600" />
                         Mã Giảm Giá / Voucher
                       </label>
@@ -1104,15 +1130,15 @@ export default function CheckoutPage() {
                         type="text"
                         value={voucherInput}
                         onChange={(e) => setVoucherInput(e.target.value.toUpperCase())}
-                        placeholder="Nhập mã ưu đãi"
+                        placeholder="Nhập mã ưu đãi (VD: FREESHIPVIP)"
                         disabled={applyingVoucher || !!appliedVoucher}
-                        className="flex-1 h-10 bg-neutral-50/70 hover:bg-neutral-50 focus:bg-white border border-neutral-200 rounded-xl px-3.5 text-xs text-neutral-800 uppercase tracking-wider placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 transition-all shadow-xs disabled:opacity-50"
+                        className="flex-1 h-10 bg-neutral-50/70 hover:bg-neutral-50 focus:bg-white border border-neutral-200 rounded-xl px-3.5 text-xs text-neutral-800 uppercase tracking-normal placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 transition-all shadow-xs disabled:opacity-50"
                       />
                       <button
                         type="button"
                         onClick={handleApplyVoucher}
                         disabled={applyingVoucher || !voucherInput.trim() || !!appliedVoucher}
-                        className="px-4.5 h-10 rounded-xl bg-neutral-900 hover:bg-amber-700 text-white text-xs font-medium tracking-wide uppercase transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap shadow-xs flex items-center justify-center gap-1.5"
+                        className="px-4.5 h-10 rounded-xl bg-neutral-900 hover:bg-amber-700 text-white text-xs font-medium tracking-normal normal-case transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap shadow-xs flex items-center justify-center gap-1.5"
                       >
                         {applyingVoucher ? (
                           <Loader2 size={13} className="animate-spin" />

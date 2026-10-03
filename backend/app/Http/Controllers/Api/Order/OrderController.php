@@ -107,7 +107,10 @@ class OrderController extends Controller
         $discount = 0;
         $voucherCode = $request->input('voucher_code');
 
-        if ($voucherCode) {
+        if ($voucherCode && strtoupper($voucherCode) === 'FREESHIPVIP') {
+            // Freeship VIP voucher from Lucky Wheel
+            $voucher = null;
+        } elseif ($voucherCode) {
             $voucher = Voucher::where('code', strtoupper($voucherCode))
                 ->where('is_active', true)
                 ->where(function ($q) {
@@ -258,7 +261,12 @@ class OrderController extends Controller
                 }
 
                 // Validate and calculate voucher discount server-side (min_order_amount check inside transaction)
-                if ($voucher) {
+                if ($voucherCode && strtoupper($voucherCode) === 'FREESHIPVIP') {
+                    $shippingFee = 0;
+                } elseif ($voucher) {
+                    if ($voucher->discount_type === 'free_shipping') {
+                        $shippingFee = 0;
+                    }
                     if ($subtotal < $voucher->min_order_amount) {
                         throw ValidationException::withMessages([
                             'voucher_code' => 'Đơn hàng tối thiểu ' . number_format($voucher->min_order_amount, 0, ',', '.') . '₫ mới có thể áp dụng mã này.',

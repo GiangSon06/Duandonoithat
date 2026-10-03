@@ -57,6 +57,7 @@ export default function AccountPage() {
   >("orders");
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [trackingOrder, setTrackingOrder] = useState<any | null>(null);
 
   // Affiliate State
   const [affiliateStats, setAffiliateStats] = useState<AffiliateStats | null>(null);
@@ -435,12 +436,14 @@ export default function AccountPage() {
 
                               <div className="flex items-center gap-3">
                                 {getStatusBadge(order.order_status)}
-                                <Link
-                                  href={`/order-success/${order.order_number}`}
-                                  className="inline-flex items-center gap-1 text-xs text-gold hover:underline font-medium"
+                                <button
+                                  type="button"
+                                  onClick={() => setTrackingOrder(order)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold/15 text-gold hover:bg-gold hover:text-charcoal transition-all text-xs font-semibold cursor-pointer shadow-xs"
                                 >
-                                  Theo Dõi Vận Đơn <ChevronRight size={14} />
-                                </Link>
+                                  <Truck size={14} />
+                                  <span>Theo Dõi Vận Đơn</span>
+                                </button>
                               </div>
                             </div>
 
@@ -906,6 +909,151 @@ export default function AccountPage() {
             </div>
           </div>
         </section>
+
+        {/* Real-time Order Tracking Modal */}
+        {trackingOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-neutral-200 relative overflow-hidden space-y-6">
+              {/* Header */}
+              <div className="flex items-start justify-between pb-4 border-b border-neutral-100">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 text-[10px] font-bold uppercase tracking-wider mb-2">
+                    <Truck size={12} className="text-amber-600" />
+                    <span>Lộ Trình Vận Chuyển GHN Realtime</span>
+                  </div>
+                  <h3 className="font-serif text-xl font-bold text-neutral-900">
+                    Theo Dõi Đơn #{trackingOrder.order_number}
+                  </h3>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Cập nhật trạng thái từng bước đóng gói và vận chuyển
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTrackingOrder(null)}
+                  className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center transition-colors cursor-pointer text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* 5-Stage Timeline */}
+              <div className="space-y-4 py-2">
+                {[
+                  {
+                    step: 1,
+                    title: "1. Đã Tiếp Nhận Đơn Hàng",
+                    desc: "Hệ thống ghi nhận đơn hàng thành công.",
+                    time: trackingOrder.created_at ? new Date(trackingOrder.created_at).toLocaleDateString("vi-VN") : "Hôm nay",
+                    isDone: true,
+                    isActive: trackingOrder.order_status === "pending",
+                  },
+                  {
+                    step: 2,
+                    title: "2. Đã Xác Nhận Đơn Hàng",
+                    desc: "Bộ phận kho GS Luxury đã kiểm định vật liệu và xuất kho.",
+                    time: "Hoàn tất xác nhận",
+                    isDone: ["processing", "shipping", "completed"].includes(trackingOrder.order_status),
+                    isActive: trackingOrder.order_status === "processing",
+                  },
+                  {
+                    step: 3,
+                    title: "3. Đang Đóng Gói White-Glove",
+                    desc: "Bọc màng PE 4 lớp chống xước và cố định khung gỗ an toàn.",
+                    time: "Đóng gói tiêu chuẩn",
+                    isDone: ["processing", "shipping", "completed"].includes(trackingOrder.order_status),
+                    isActive: trackingOrder.order_status === "processing",
+                  },
+                  {
+                    step: 4,
+                    title: "4. Đang Vận Chuyển GHN Express",
+                    desc: "Đơn hàng đang trên xe chuyên dụng giao tới địa chỉ của bạn.",
+                    time: "Dự kiến 1 - 3 ngày",
+                    isDone: ["shipping", "completed"].includes(trackingOrder.order_status),
+                    isActive: trackingOrder.order_status === "shipping",
+                  },
+                  {
+                    step: 5,
+                    title: "5. Giao Hàng & Nghiệm Thu",
+                    desc: "Kỹ thuật viên bàn giao và hỗ trợ lắp đặt tận nơi.",
+                    time: trackingOrder.order_status === "completed" ? "Đã giao thành công" : "Chờ bàn giao",
+                    isDone: trackingOrder.order_status === "completed",
+                    isActive: trackingOrder.order_status === "completed",
+                  },
+                ].map((stage, idx, arr) => (
+                  <div key={stage.step} className="flex gap-4 relative">
+                    {idx < arr.length - 1 && (
+                      <div
+                        className={`absolute left-3.5 top-7 bottom-0 w-0.5 -translate-x-1/2 ${
+                          stage.isDone ? "bg-amber-500" : "bg-neutral-200"
+                        }`}
+                      />
+                    )}
+                    <div
+                      className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 text-xs font-bold transition-colors ${
+                        stage.isDone
+                          ? "bg-amber-600 text-white shadow-sm ring-2 ring-amber-100"
+                          : "bg-neutral-100 text-neutral-400 border border-neutral-300"
+                      }`}
+                    >
+                      {stage.isDone ? "✓" : stage.step}
+                    </div>
+                    <div className="flex-1 pb-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className={`text-xs font-semibold ${stage.isDone ? "text-neutral-900" : "text-neutral-500"}`}>
+                          {stage.title}
+                        </h4>
+                        <span className="text-[10px] text-neutral-400 font-mono">{stage.time}</span>
+                      </div>
+                      <p className="text-[11px] text-neutral-500 mt-0.5 leading-relaxed">
+                        {stage.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Recipient Info Card */}
+              <div className="p-4 bg-neutral-50 rounded-2xl border border-neutral-100 space-y-2 text-xs">
+                <div className="flex justify-between text-neutral-700">
+                  <span className="text-neutral-400">Người nhận:</span>
+                  <span className="font-semibold text-neutral-900">{trackingOrder.customer_name}</span>
+                </div>
+                <div className="flex justify-between text-neutral-700">
+                  <span className="text-neutral-400">Số điện thoại:</span>
+                  <span className="font-medium text-neutral-900">{trackingOrder.customer_phone}</span>
+                </div>
+                <div className="flex justify-between text-neutral-700 gap-2">
+                  <span className="text-neutral-400 shrink-0">Địa chỉ giao:</span>
+                  <span className="font-medium text-neutral-900 text-right truncate">
+                    {trackingOrder.shipping_address}, {trackingOrder.shipping_city}
+                  </span>
+                </div>
+                <div className="flex justify-between text-neutral-700">
+                  <span className="text-neutral-400">Vận chuyển:</span>
+                  <span className="font-semibold text-amber-700">GHN Express (White-Glove)</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3 pt-2">
+                <Link
+                  href={`/order-success/${trackingOrder.order_number}`}
+                  className="flex-1 py-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold text-center transition-colors"
+                >
+                  Xem Hóa Đơn Chi Tiết
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setTrackingOrder(null)}
+                  className="py-3 px-5 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-700 text-xs font-medium transition-colors"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </SiteChrome>
     </main>
   );

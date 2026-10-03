@@ -298,4 +298,61 @@ class AdminProductController extends Controller
             'message' => 'Không tìm thấy file ảnh.',
         ], 400);
     }
+
+    /**
+     * Nhập / Xuất kho nhanh cho sản phẩm hoặc biến thể
+     */
+    public function adjustStock(Request $request, $id)
+    {
+        $request->validate([
+            'type' => 'required|in:import,export,set',
+            'quantity' => 'required|integer|min:0',
+            'variant_id' => 'nullable|exists:product_variants,id',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $product = Product::findOrFail($id);
+        $variant = null;
+        if ($request->variant_id) {
+            $variant = ProductVariant::where('product_id', $product->id)->findOrFail($request->variant_id);
+        }
+
+        $type = $request->type;
+        $qty = (int) $request->quantity;
+
+        if ($variant) {
+            if ($type === 'import') {
+                $variant->stock_quantity += $qty;
+            } elseif ($type === 'export') {
+                $variant->stock_quantity = max(0, $variant->stock_quantity - $qty);
+            } else {
+                $variant->stock_quantity = $qty;
+            }
+            $variant->save();
+
+            // Sync total product stock
+            $product->stock_quantity = ProductVariant::where('product_id', $product->id)->sum('stock_quantity');
+            $product->save();
+        } else {
+            if ($type === 'import') {
+                $product->stock_quantity += $qty;
+            } elseif ($type === 'export') {
+                $product->stock_quantity = max(0, $product->stock_quantity - $qty);
+            } else {
+                $product->stock_quantity = $qty;
+            }
+            $product->save();
+        }
+
+        $actionText = $type === 'import' ? "Nhập thêm {$qty} sản phẩm" : ($type === 'export' ? "Xuất kho {$qty} sản phẩm" : "Cập nhật tồn kho thành {$qty}");
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$actionText} thành công! Tồn kho hiện tại: " . ($variant ? $variant->stock_quantity : $product->stock_quantity),
+            'data' => [
+                'product' => $product->load(['variants', 'images', 'category']),
+                'current_stock' => $variant ? $variant->stock_quantity : $product->stock_quantity,
+            ],
+        ]);
+    }
 }
