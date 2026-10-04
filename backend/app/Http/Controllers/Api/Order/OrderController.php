@@ -319,6 +319,15 @@ class OrderController extends Controller
                     $authUser->decrement('coins', min($authUser->coins, $coinsUsed));
                 }
 
+                // Thưởng 10 xu nếu đơn hàng trên 10 triệu đồng
+                $coinsEarned = 0;
+                if ($subtotal >= 10000000 || $totalAmount >= 10000000) {
+                    $coinsEarned = 10;
+                    if ($authUser) {
+                        $authUser->increment('coins', $coinsEarned);
+                    }
+                }
+
                 // Check Affiliate Referral
                 $refCode = $request->input('referral_code');
                 if ($refCode) {
@@ -373,12 +382,17 @@ class OrderController extends Controller
                     $voucher->increment('used_count');
                 }
 
-                return $order;
+                return [
+                    'order' => $order,
+                    'coins_earned' => $coinsEarned,
+                    'coins_used' => $coinsUsed,
+                    'user_coins' => $authUser ? (int) $authUser->fresh()->coins : null,
+                ];
             });
 
             // 4. Send confirmation email asynchronously via Background Queue
             try {
-                Mail::to($result->customer_email)->queue(new OrderConfirmation($result->load('items')));
+                Mail::to($result['order']->customer_email)->queue(new OrderConfirmation($result['order']->load('items')));
             } catch (\Exception $e) {
                 // Log error but don't fail the checkout transaction
                 Log::error('Failed to queue order confirmation email: ' . $e->getMessage());
@@ -388,7 +402,10 @@ class OrderController extends Controller
                 'success' => true,
                 'message' => 'Đặt hàng thành công! GS Luxury sẽ liên hệ xác nhận trong thời gian sớm nhất.',
                 'data' => [
-                    'order' => $result->load('items'),
+                    'order' => $result['order']->load('items'),
+                    'coins_earned' => $result['coins_earned'],
+                    'coins_used' => $result['coins_used'],
+                    'user_coins' => $result['user_coins'],
                 ],
             ];
 

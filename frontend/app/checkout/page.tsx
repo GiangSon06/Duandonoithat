@@ -155,7 +155,15 @@ export default function CheckoutPage() {
           },
         ]);
       });
-  }, []);
+
+    // Check if FREESHIPVIP was saved from spin wheel
+    if (typeof window !== "undefined") {
+      const savedV = localStorage.getItem("gs_applied_voucher");
+      if (savedV === "FREESHIPVIP" && !appliedVoucher) {
+        applyVoucherCode("FREESHIPVIP");
+      }
+    }
+  }, [appliedVoucher, applyVoucherCode]);
 
   // Fetch GHN Provinces on mount
   useEffect(() => {
@@ -466,12 +474,41 @@ export default function CheckoutPage() {
       if (res.success && res.data?.order) {
         if (typeof window !== "undefined") {
           sessionStorage.removeItem("gs_checkout_idempotency");
+          localStorage.removeItem("gs_applied_voucher");
         }
         const order = res.data.order;
         const orderNumber = order.order_number;
 
-        if (useCoins && coinsToUse > 0) {
-          setUserCoins((prev) => Math.max(0, prev - coinsToUse));
+        // Xử lý trừ xu thanh toán và cộng 10 xu nếu đơn trên 10 triệu
+        const isEligibleForBonusCoins = cartSubtotal >= 10000000 || totalAmount >= 10000000;
+
+        if (typeof res.data?.user_coins === "number") {
+          setUserCoins(res.data.user_coins);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("gs_coins", res.data.user_coins.toString());
+          }
+        } else {
+          let updatedCoins = userCoins;
+          if (useCoins && coinsToUse > 0) {
+            updatedCoins = Math.max(0, updatedCoins - coinsToUse);
+          }
+          if (isEligibleForBonusCoins) {
+            updatedCoins += 10;
+          }
+          setUserCoins(updatedCoins);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("gs_coins", updatedCoins.toString());
+          }
+        }
+
+        setUseCoins(false);
+
+        if (isEligibleForBonusCoins) {
+          showToast({
+            type: "success",
+            title: "Thưởng Xu VIP",
+            message: "🎉 Đơn hàng trên 10 triệu đồng: Bạn được tặng thêm 10 GS Coins vào ví!",
+          });
         }
 
         // If payment method is MoMo, redirect to MoMo payUrl
@@ -1151,18 +1188,51 @@ export default function CheckoutPage() {
                     {voucherError && <p className="mt-1.5 text-[11px] text-red-600 font-medium">{voucherError}</p>}
                     {voucherSuccess && <p className="mt-1.5 text-[11px] text-emerald-600 font-medium">{voucherSuccess}</p>}
 
-                    {appliedVoucher && (
-                      <div className="mt-2.5 flex items-center justify-between bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-xl">
+                    {appliedVoucher ? (
+                      <div className="mt-2.5 flex items-center justify-between bg-emerald-50 border border-emerald-200 px-3.5 py-2.5 rounded-xl">
                         <div className="flex items-center gap-2">
-                          <CheckCircle2 size={14} className="text-emerald-700" />
-                          <span className="text-xs text-emerald-800 font-semibold">{appliedVoucher.code}</span>
+                          <CheckCircle2 size={16} className="text-emerald-700 shrink-0" />
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs text-emerald-800 font-bold">{appliedVoucher.code}</span>
+                              {appliedVoucher.code === "FREESHIPVIP" && (
+                                <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 font-bold px-1.5 py-0.2 rounded-md">
+                                  🎁 Freeship VIP 0đ
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-emerald-700 mt-0.5">
+                              {appliedVoucher.code === "FREESHIPVIP"
+                                ? "Miễn phí vận chuyển toàn quốc (Từ Vòng Quay May Mắn)"
+                                : appliedVoucher.name}
+                            </p>
+                          </div>
                         </div>
                         <button
                           type="button"
                           onClick={handleRemoveVoucher}
-                          className="text-xs text-red-500 hover:text-red-700 font-medium hover:underline"
+                          className="text-xs text-red-500 hover:text-red-700 font-medium hover:underline shrink-0 ml-2"
                         >
                           Hủy bỏ
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-2.5 p-2.5 bg-gradient-to-r from-amber-50 to-amber-100/60 border border-amber-200/90 rounded-xl flex items-center justify-between gap-2 shadow-2xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Sparkles size={15} className="text-amber-600 shrink-0" />
+                          <div className="text-[11px] text-amber-900 truncate">
+                            <span className="font-bold">Mã FREESHIP VIP</span> (Vòng quay may mắn)
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVoucherInput("FREESHIPVIP");
+                            applyVoucherCode("FREESHIPVIP");
+                          }}
+                          className="shrink-0 text-[11px] font-bold text-amber-900 bg-white hover:bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-300 transition-colors shadow-2xs cursor-pointer"
+                        >
+                          Áp dụng ngay
                         </button>
                       </div>
                     )}

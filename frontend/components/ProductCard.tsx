@@ -46,6 +46,8 @@ export default function ProductCard({
   const hoverImage =
     product.images?.[1]?.image_url || product.image2 || null;
 
+  const [imgSrc, setImgSrc] = useState(mainImage);
+
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -79,9 +81,16 @@ export default function ProductCard({
           <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-champagne/20 border border-espresso/5">
             {/* Main Product Image */}
             <Image
-              src={mainImage}
+              src={imgSrc}
               alt={name}
               fill
+              onError={() => {
+                if (imgSrc.endsWith(".jpeg")) {
+                  setImgSrc(imgSrc.replace(".jpeg", ".jpg"));
+                } else {
+                  setImgSrc("/images/chair-1.jpg");
+                }
+              }}
               className={cn(
                 "object-cover transition-all duration-700 ease-luxe",
                 hoverImage ? "group-hover:scale-[1.03] group-hover:opacity-0" : "group-hover:scale-[1.03]"

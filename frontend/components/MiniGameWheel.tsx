@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gift, X, Sparkles, Trophy, Truck, Clock, AlertCircle } from "lucide-react";
+import { Gift, X, Sparkles, Trophy, Truck, Clock, AlertCircle, ArrowRight } from "lucide-react";
 import { useStore } from "./StoreContext";
 
 // 8 Segments: Alternating between Freeship and Chúc bạn may mắn
@@ -18,7 +19,8 @@ const WHEEL_SEGMENTS = [
 ];
 
 export default function MiniGameWheel() {
-  const { isWheelOpen, closeWheel, applyVoucherCode } = useStore();
+  const router = useRouter();
+  const { isWheelOpen, closeWheel, applyVoucherCode, cart } = useStore();
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [wonPrize, setWonPrize] = useState<any>(null);
@@ -193,8 +195,28 @@ export default function MiniGameWheel() {
                     <Truck size={15} /> Bạn đã trúng Mã Miễn Phí Vận Chuyển (FREESHIPVIP)!
                   </p>
                   <p className="text-[11px] text-green-700">
-                    Mã đã được tự động kích hoạt vào giỏ hàng của bạn.
+                    Mã đã được tự động kích hoạt vào đơn hàng của bạn.
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      applyVoucherCode("FREESHIPVIP");
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem("gs_applied_voucher", "FREESHIPVIP");
+                      }
+                      closeWheel();
+                      if (cart && cart.length > 0) {
+                        router.push("/checkout");
+                      } else {
+                        router.push("/products");
+                      }
+                    }}
+                    className="w-full mt-2.5 py-2.5 px-4 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 hover:from-amber-700 hover:to-amber-900 text-white font-medium text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:shadow-lg"
+                  >
+                    <Truck size={14} />
+                    <span>Áp dụng mã & {cart && cart.length > 0 ? "Thanh toán ngay (Freeship 0đ)" : "Chọn sản phẩm ngay"}</span>
+                    <ArrowRight size={13} />
+                  </button>
                 </>
               ) : (
                 <>

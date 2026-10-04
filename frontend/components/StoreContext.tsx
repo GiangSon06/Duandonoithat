@@ -154,6 +154,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const savedCoins = localStorage.getItem("gs_coins");
         if (savedCoins) setUserCoins(parseInt(savedCoins) || 100);
 
+        // Load saved voucher from spin wheel or previous session
+        const savedVoucher = localStorage.getItem("gs_applied_voucher");
+        if (savedVoucher === "FREESHIPVIP") {
+          setAppliedVoucher({
+            id: 99999,
+            code: "FREESHIPVIP",
+            name: "Voucher Miễn Phí Vận Chuyển VIP (Vòng Quay May Mắn)",
+            discount_type: "free_shipping",
+            discount_value: 0,
+            min_order_amount: 0,
+            is_active: true,
+          });
+        }
+
         // Check URL for referral parameter (?ref=GS-XXXX)
         const urlParams = new URLSearchParams(window.location.search);
         const refParam = urlParams.get("ref");
@@ -169,7 +183,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const savedUser = localStorage.getItem("gs_auth_user");
         if (savedToken) {
           setToken(savedToken);
-          if (savedUser) setUser(JSON.parse(savedUser));
+          if (savedUser) {
+            const parsedUser = JSON.parse(savedUser);
+            setUser(parsedUser);
+            if (typeof parsedUser?.coins === "number") {
+              setUserCoins(parsedUser.coins);
+            }
+          }
 
           authService
             .getMe()
@@ -177,6 +197,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               if (res.success && res.data?.user) {
                 setUser(res.data.user);
                 localStorage.setItem("gs_auth_user", JSON.stringify(res.data.user));
+                if (typeof res.data.user.coins === "number") {
+                  setUserCoins(res.data.user.coins);
+                  localStorage.setItem("gs_coins", res.data.user.coins.toString());
+                }
               } else {
                 localStorage.removeItem("gs_auth_token");
                 localStorage.removeItem("gs_auth_user");
@@ -314,6 +338,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
     setAppliedVoucher(null);
     setDiscountAmount(0);
+    setUseCoins(false);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("gs_applied_voucher");
+    }
   }, []);
 
   const toggleWishlist = useCallback((productId: string | number) => {
@@ -360,10 +388,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const applyVoucherCode = useCallback(
     async (code: string) => {
       try {
-        const res = await voucherService.applyVoucher(code, cartSubtotal);
+        const cleanCode = code.trim().toUpperCase();
+        if (cleanCode === "FREESHIPVIP") {
+          const vipVoucher: ApiVoucher = {
+            id: 99999,
+            code: "FREESHIPVIP",
+            name: "Voucher Miễn Phí Vận Chuyển VIP (Vòng Quay May Mắn)",
+            discount_type: "free_shipping",
+            discount_value: 0,
+            min_order_amount: 0,
+            is_active: true,
+          };
+          setAppliedVoucher(vipVoucher);
+          setDiscountAmount(0);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("gs_applied_voucher", "FREESHIPVIP");
+          }
+          return { success: true, message: "Áp dụng mã FREESHIP VIP thành công! Bạn được miễn phí vận chuyển toàn quốc." };
+        }
+
+        const res = await voucherService.applyVoucher(cleanCode, cartSubtotal);
         if (res.success && res.data) {
           setAppliedVoucher(res.data.voucher);
           setDiscountAmount(res.data.discount_amount);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("gs_applied_voucher", res.data.voucher.code);
+          }
           return { success: true, message: res.message || "Áp dụng mã thành công!" };
         }
         return { success: false, message: res.message || "Mã giảm giá không hợp lệ" };
@@ -377,6 +427,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const removeVoucher = useCallback(() => {
     setAppliedVoucher(null);
     setDiscountAmount(0);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("gs_applied_voucher");
+    }
   }, []);
 
   // Gamification
@@ -401,6 +454,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (res.success && res.data.token) {
         setToken(res.data.token);
         setUser(res.data.user);
+        if (typeof res.data.user?.coins === "number") {
+          setUserCoins(res.data.user.coins);
+          localStorage.setItem("gs_coins", res.data.user.coins.toString());
+        }
         localStorage.setItem("gs_auth_token", res.data.token);
         localStorage.setItem("gs_auth_user", JSON.stringify(res.data.user));
         setAuthOpen(false);
@@ -426,6 +483,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (res.success && res.data.token) {
           setToken(res.data.token);
           setUser(res.data.user);
+          if (typeof res.data.user?.coins === "number") {
+            setUserCoins(res.data.user.coins);
+            localStorage.setItem("gs_coins", res.data.user.coins.toString());
+          }
           localStorage.setItem("gs_auth_token", res.data.token);
           localStorage.setItem("gs_auth_user", JSON.stringify(res.data.user));
           setAuthOpen(false);
