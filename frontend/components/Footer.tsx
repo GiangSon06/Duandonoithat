@@ -105,7 +105,7 @@ export default function Footer() {
             <div className="mt-5 space-y-2 text-xs text-beige/70">
               <p className="flex items-center gap-2">
                 <Mail size={14} className="text-gold shrink-0" />
-                <span>Email CSKH: <strong className="text-champagne font-mono">contact@gsluxury.vn</strong> / <strong className="text-champagne font-mono">concierge@gsluxury.vn</strong></span>
+                <span>Email CSKH: <a href="mailto:Dangnamson24@gmail.com" className="text-champagne font-mono hover:text-gold transition-colors">Dangnamson24@gmail.com</a> / <span className="text-champagne font-mono">concierge@gsluxury.vn</span></span>
               </p>
               <p className="flex items-center gap-2">
                 <Phone size={14} className="text-gold shrink-0" />
@@ -117,29 +117,38 @@ export default function Footer() {
               </p>
               <p className="flex items-start gap-2">
                 <MapPin size={14} className="text-gold shrink-0 mt-0.5" />
-                <span>Showroom Hà Nội: 68 Tràng Tiền, Hoàn Kiếm, Hà Nội</span>
+                <span>Showroom Hà Nội: Trường đại học Tài nguyên và môi trường Hà Nội, Phú diễn, Bắc từ liêm, Hà Nội</span>
               </p>
             </div>
 
-            <div className="flex gap-4 mt-6">
+            <div className="flex items-center gap-3.5 mt-6">
               <a
-                href="#"
-                aria-label="Instagram"
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-gold hover:border-gold transition-colors focus-ring"
-              >
-                <Instagram strokeWidth={1.5} size={16} />
-              </a>
-              <a
-                href="#"
-                aria-label="Facebook"
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-gold hover:border-gold transition-colors focus-ring"
+                href="https://www.facebook.com/giang.son.114064"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook GS Luxury"
+                title="Facebook: Giang Sơn"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-beige/80 hover:text-white hover:bg-[#1877F2]/20 hover:border-[#1877F2]/60 hover:shadow-[0_0_12px_rgba(24,119,242,0.3)] transition-all duration-300 focus-ring"
               >
                 <Facebook strokeWidth={1.5} size={16} />
               </a>
               <a
-                href="#"
-                aria-label="Youtube"
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:text-gold hover:border-gold transition-colors focus-ring"
+                href="https://www.instagram.com/nhimsthongthai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram GS Luxury"
+                title="Instagram: @nhimsthongthai"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-beige/80 hover:text-white hover:bg-gradient-to-tr hover:from-[#F58529]/20 hover:via-[#DD2A7B]/20 hover:to-[#8134AF]/20 hover:border-[#DD2A7B]/60 hover:shadow-[0_0_12px_rgba(221,42,123,0.3)] transition-all duration-300 focus-ring"
+              >
+                <Instagram strokeWidth={1.5} size={16} />
+              </a>
+              <a
+                href="https://www.youtube.com/@kenjiac1413"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Youtube GS Luxury"
+                title="Youtube: @kenjiac1413"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-beige/80 hover:text-white hover:bg-[#FF0000]/20 hover:border-[#FF0000]/60 hover:shadow-[0_0_12px_rgba(255,0,0,0.3)] transition-all duration-300 focus-ring"
               >
                 <Youtube strokeWidth={1.5} size={16} />
               </a>

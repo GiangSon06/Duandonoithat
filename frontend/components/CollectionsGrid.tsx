@@ -4,13 +4,40 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
 import { collections, getFeaturedProducts } from "@/lib/products";
 import ProductCard from "./ProductCard";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   show: { opacity: 1, y: 0 },
+};
+
+const COLLECTION_META: Record<string, { tag: string; desc: string }> = {
+  "living-room": {
+    tag: "HAUTE LIVING",
+    desc: "Sofa da bò Ý & Bàn trà chạm khắc thủ công",
+  },
+  "bedroom": {
+    tag: "MASTER SUITE",
+    desc: "Giường ngủ vòm hoàng gia & Tủ áo thượng lưu",
+  },
+  "dining": {
+    tag: "GRAND BANQUET",
+    desc: "Bàn tiệc cẩm thạch & Ghế bọc nhung dệt cao cấp",
+  },
+  "lighting": {
+    tag: "ARTISANAL LIGHTING",
+    desc: "Gương nghệ thuật & Đèn chùm pha lê tinh xảo",
+  },
+  "kitchen": {
+    tag: "CULINARY ATELIER",
+    desc: "Đảo bếp đá tự nhiên & Tủ bếp gỗ óc chó quý",
+  },
+  "bespoke": {
+    tag: "BESPOKE SERVICE",
+    desc: "Chế tác độc bản theo kiến trúc riêng của gia chủ",
+  },
 };
 
 export default function CollectionsGrid() {
@@ -20,62 +47,84 @@ export default function CollectionsGrid() {
   return (
     <section id="collections" className="py-24 md:py-32 px-6 bg-beige">
       <div className="mx-auto max-w-[1440px]">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
-          <div>
-            <p className="text-gold text-xs tracking-widest2 uppercase mb-4">
-              Bộ Sưu Tập Tuyển Chọn
-            </p>
-            <h2 className="font-serif text-4xl md:text-5xl text-balance max-w-lg">
-              Từng Món Đồ, Một Câu Chuyện Thủ Công
-            </h2>
+        {/* Header cân đối, chuẩn thiết kế tạp chí kiến trúc thượng lưu */}
+        <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-[11px] font-medium tracking-widest2 uppercase mb-4 shadow-xs">
+            <Sparkles size={12} />
+            <span>Bộ Sưu Tập Tuyển Chọn</span>
           </div>
-          <p className="text-espresso/60 max-w-sm text-sm">
-            Mỗi sản phẩm được chế tác bởi nghệ nhân hàng đầu, sử dụng chất liệu
-            tự nhiên thượng hạng — từ da Ý nguyên tấm đến gỗ óc chó quý.
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-espresso text-balance leading-tight">
+            Từng Món Đồ, Một Câu Chuyện Thủ Công
+          </h2>
+          <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto my-4.5" />
+          <p className="text-espresso/70 text-sm md:text-base leading-relaxed">
+            Mỗi tuyệt tác được chế tác bởi nghệ nhân hàng đầu, sử dụng chất liệu tự nhiên thượng hạng — từ da Ý nguyên tấm, đá cẩm thạch tự nhiên đến gỗ óc chó quý hiếm.
           </p>
         </div>
 
-        {/* Lưới danh mục bất đối xứng — bấm vào để xem toàn bộ sản phẩm trong danh mục */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4 mb-20">
-          {collections.map((col, i) => (
-            <motion.div
-              key={col.id}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-80px" }}
-              variants={fadeUp}
-              transition={{
-                duration: 0.6,
-                delay: i * 0.06,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className={
-                i === 0 || i === 3
-                  ? "col-span-2 md:col-span-3 aspect-[16/10]"
-                  : "col-span-1 md:col-span-2 aspect-square"
-              }
-            >
-              <Link
-                href={`/collections/${col.id}`}
-                className="group relative block w-full h-full overflow-hidden"
+        {/* Lưới danh mục 3 cột đối xứng, thuận mắt, bo góc mềm mại chuẩn Luxury */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7 mb-24">
+          {collections.map((col, i) => {
+            const meta = COLLECTION_META[col.id] || {
+              tag: "EXCLUSIVE",
+              desc: "Bộ sưu tập nội thất cao cấp",
+            };
+            return (
+              <motion.div
+                key={col.id}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-60px" }}
+                variants={fadeUp}
+                transition={{
+                  duration: 0.6,
+                  delay: i * 0.07,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className="group relative block w-full aspect-[4/5] rounded-3xl overflow-hidden border border-espresso/10 hover:border-gold/60 shadow-sm hover:shadow-2xl transition-all duration-500 bg-espresso/5"
               >
-                <Image
-                  src={col.image}
-                  alt={col.label}
-                  fill
-                  className="object-cover transition-transform duration-700 ease-luxe group-hover:scale-105"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-charcoal/0 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-4 md:p-5">
-                  <span className="text-beige font-serif text-lg md:text-2xl">
-                    {col.label}
-                  </span>
-                  <span className="block w-8 h-px bg-gold mt-2 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-luxe" />
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+                <Link
+                  href={`/collections/${col.id}`}
+                  className="block w-full h-full relative"
+                >
+                  <Image
+                    src={col.image}
+                    alt={col.label}
+                    fill
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                  {/* Luxury Multi-layer Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/25 to-black/5 transition-opacity duration-500 group-hover:from-charcoal/95" />
+
+                  {/* Top Tag Badge */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/40 backdrop-blur-md border border-gold/30 text-champagne text-[10px] tracking-widest font-serif uppercase rounded-full shadow-xs">
+                      <Sparkles size={11} className="text-gold" />
+                      {meta.tag}
+                    </span>
+                  </div>
+
+                  {/* Bottom Floating Glassmorphism Card */}
+                  <div className="absolute bottom-4 left-4 right-4 z-10 p-4 md:p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 group-hover:border-gold/50 group-hover:bg-white/15 transition-all duration-500">
+                    <div className="flex items-end justify-between gap-3">
+                      <div>
+                        <h3 className="font-serif text-xl md:text-2xl text-champagne font-medium group-hover:text-gold transition-colors duration-300">
+                          {col.label}
+                        </h3>
+                        <p className="text-xs text-beige/80 mt-1 line-clamp-1">
+                          {meta.desc}
+                        </p>
+                      </div>
+                      <span className="w-9 h-9 rounded-full bg-gold/20 border border-gold/40 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-charcoal group-hover:scale-110 transition-all duration-300 shrink-0 shadow-xs">
+                        <ArrowUpRight size={16} />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Sản phẩm nổi bật — chỉ hiện số lượng giới hạn, xem thêm dẫn sang trang riêng */}
