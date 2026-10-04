@@ -38,9 +38,11 @@ export default function AdminDashboardPage() {
   const [timeFilter, setTimeFilter] = useState<"today" | "7days" | "month" | "all">("7days");
   const [chartView, setChartView] = useState<"revenue" | "orders">("revenue");
   const [copiedOrder, setCopiedOrder] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const fetchStats = async (isManual = false) => {
     if (isManual) setRefreshing(true);
+    setLoadError(null);
     try {
       const res = await adminService.getDashboardStats();
       if (res.success && res.data) {
@@ -52,16 +54,24 @@ export default function AdminDashboardPage() {
             message: "Dữ liệu kinh doanh và báo cáo đã được làm mới tức thì.",
           });
         }
-      }
-    } catch (err) {
-      console.error("Failed to load admin stats:", err);
-      if (isManual) {
+      } else {
+        const msg = res.message || "Không thể tải số liệu phân tích.";
+        setLoadError(msg);
         showToast({
           type: "error",
-          title: "Lỗi đồng bộ",
-          message: "Không thể làm mới dữ liệu, vui lòng thử lại.",
+          title: "Chưa thể đồng bộ số liệu",
+          message: msg,
         });
       }
+    } catch (err: any) {
+      console.error("Failed to load admin stats:", err);
+      const msg = err.message || "Không thể kết nối đến máy chủ quản trị.";
+      setLoadError(msg);
+      showToast({
+        type: "error",
+        title: "Lỗi đồng bộ",
+        message: msg,
+      });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -188,6 +198,22 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Error / Offline Alert Banner if any */}
+      {loadError && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 text-xs text-red-200">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="text-red-400 shrink-0" size={18} />
+            <span>{loadError}</span>
+          </div>
+          <button
+            onClick={() => fetchStats(true)}
+            className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-100 rounded-lg text-xs font-medium transition-colors"
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
 
       {/* 6 Key Performance Indicator (KPI) Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">

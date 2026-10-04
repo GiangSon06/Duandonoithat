@@ -12,7 +12,7 @@ class AdminCustomerController extends Controller
     {
         $query = User::withCount('orders')
             ->withSum(['orders as total_spent' => function ($q) {
-                $q->where('status', '!=', 'cancelled');
+                $q->where('order_status', '!=', 'cancelled');
             }], 'total_amount')
             ->latest();
 

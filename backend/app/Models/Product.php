@@ -28,6 +28,7 @@ class Product extends Model
         'care_instructions',
         'in_stock',
         'stock_quantity',
+        'sold_count',
         'is_featured',
         'is_new',
         'is_bestseller',
@@ -46,6 +47,7 @@ class Product extends Model
         'rating_avg' => 'float',
         'rating_count' => 'integer',
         'stock_quantity' => 'integer',
+        'sold_count' => 'integer',
     ];
 
     protected $appends = [

@@ -40,7 +40,9 @@ class SampleOrdersSeeder extends Seeder
             ]);
             $newCustomers[] = $c;
         }
-        $this->command->info('Created ' . count($newCustomers) . ' new customers.');
+        if ($this->command) {
+            $this->command->info('Created ' . count($newCustomers) . ' new customers.');
+        }
 
         // Combine all customers
         $allCustomers = collect([$customer])->merge($newCustomers)->toArray();
@@ -74,8 +76,8 @@ class SampleOrdersSeeder extends Seeder
                 }
             }
 
-            // Random date within last 60 days
-            $daysAgo = rand(0, 60);
+            // Distribute dates: First 4 orders are today, rest over last 45 days
+            $daysAgo = ($i < 4) ? 0 : rand(1, 45);
             $createdAt = Carbon::today()->subDays($daysAgo)->setTime(rand(8, 20), rand(0, 59), rand(0, 59));
 
             $orderNumber = 'GSL-' . $createdAt->format('Ymd') . '-' . strtoupper(Str::random(6));
@@ -118,6 +120,8 @@ class SampleOrdersSeeder extends Seeder
                 'total_price' => $subtotal,
             ]);
         }
-        $this->command->info('Created ' . $totalOrders . ' sample orders with various statuses.');
+        if ($this->command) {
+            $this->command->info('Created ' . $totalOrders . ' sample orders with various statuses.');
+        }
     }
 }
