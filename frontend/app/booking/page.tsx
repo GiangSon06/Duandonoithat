@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   CheckCircle2,
   Calendar,
@@ -22,7 +23,15 @@ import {
 import SiteChrome from "@/components/SiteChrome";
 import { consultationService } from "@/services/api";
 
-export default function BookingPage() {
+function BookingFormInner() {
+  const searchParams = useSearchParams();
+  const fromAi = searchParams.get("from_ai") === "1" || searchParams.get("from_ai") === "true";
+  const aiSpaceType = searchParams.get("space_type");
+  const aiStyle = searchParams.get("style");
+  const aiArea = searchParams.get("area");
+  const aiBudget = searchParams.get("budget");
+  const aiNotes = searchParams.get("notes");
+
   const [formData, setFormData] = useState({
     full_name: "",
     phone: "",
@@ -33,6 +42,17 @@ export default function BookingPage() {
     budget_range: "100 - 300 triệu",
     message: "",
   });
+
+  useEffect(() => {
+    if (fromAi) {
+      setFormData((prev) => ({
+        ...prev,
+        space_type: aiSpaceType || prev.space_type,
+        budget_range: aiBudget || prev.budget_range,
+        message: aiNotes ? `${aiNotes}` : prev.message,
+      }));
+    }
+  }, [fromAi, aiSpaceType, aiBudget, aiNotes]);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -202,6 +222,30 @@ export default function BookingPage() {
                     Điền thông tin bên dưới để kiến trúc sư chuẩn bị mẫu vật liệu và concept phù hợp nhất cho tư gia của bạn.
                   </p>
                 </div>
+
+                {fromAi && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50/90 via-amber-100/60 to-amber-50/90 border border-gold/50 flex items-start gap-3.5 shadow-sm">
+                    <div className="w-8 h-8 rounded-xl bg-gold/20 text-gold flex items-center justify-center shrink-0 mt-0.5">
+                      <Award size={18} />
+                    </div>
+                    <div className="text-xs space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold text-espresso uppercase tracking-wider text-[11px]">
+                          Đã Liên Kết Bản Thẩm Định AI Spatial Stylist
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-medium">
+                          Hồ Sơ VIP Ưu Tiên
+                        </span>
+                      </div>
+                      <p className="text-espresso/80 leading-relaxed">
+                        Không gian khảo sát: <strong className="text-espresso">{aiSpaceType || formData.space_type}</strong> • Phong cách: <strong className="text-espresso">{aiStyle || "Modern Luxury"}</strong> • Quy mô: <strong className="text-espresso">{aiArea || "Tiêu chuẩn"}</strong>
+                      </p>
+                      <p className="text-stone-600 text-[11px] italic">
+                        KTS Trưởng sẽ trực tiếp mang mẫu da bò thuộc, gỗ óc chó và bảng mẫu vật liệu tương thích đến tận nơi khảo sát cho Quý khách.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {errorMsg && (
                   <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-center gap-2">
@@ -379,5 +423,20 @@ export default function BookingPage() {
         </section>
       </SiteChrome>
     </main>
+  );
+}
+
+export default function BookingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-8">
+        <div className="flex items-center gap-2.5 text-xs text-stone-500 font-mono">
+          <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+          <span>Đang nạp hồ sơ khảo sát tư gia...</span>
+        </div>
+      </div>
+    }>
+      <BookingFormInner />
+    </Suspense>
   );
 }

@@ -9,12 +9,12 @@ class GeminiService
 {
     protected string $apiKey;
     protected string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-    protected string $model = 'gemini-1.5-flash';
+    protected string $model = 'gemini-3.5-flash';
 
     public function __construct()
     {
         $this->apiKey = (string) (config('services.gemini.api_key') ?? env('GEMINI_API_KEY') ?? '');
-        $this->model = (string) (env('GEMINI_MODEL', 'gemini-1.5-flash'));
+        $this->model = (string) (config('services.gemini.model') ?? env('GEMINI_MODEL', 'gemini-3.5-flash'));
     }
 
     public function isConfigured(): bool
@@ -105,7 +105,7 @@ class GeminiService
                         'temperature' => 0.4,
                         'topK' => 40,
                         'topP' => 0.95,
-                        'maxOutputTokens' => 1500,
+                        'maxOutputTokens' => 4000,
                     ], $options),
                 ]);
 

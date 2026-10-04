@@ -52,4 +52,9 @@ return [
         'ipn_url' => env('VNPAY_IPN_URL', 'http://127.0.0.1:8000/api/vnpay/ipn'),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash'),
+    ],
+
 ];

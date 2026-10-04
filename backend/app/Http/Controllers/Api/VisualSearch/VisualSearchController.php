@@ -300,7 +300,7 @@ PROMPT;
     }
 
     /**
-     * AI Spatial Room Stylist & Staging Engine
+     * AI Spatial Room Stylist & Staging Engine (5-Layer Architectural Analysis)
      */
     public function analyzeRoom(Request $request): JsonResponse
     {
@@ -313,13 +313,32 @@ PROMPT;
         $imageFile = $request->file('image');
         $imageBase64 = $request->input('image_base64');
 
-        // Preset templates data
+        // Professional 5-Layer Presets Architecture
         $presets = [
             'penthouse_living' => [
-                'title' => 'Phòng Khách Penthouse Đẳng Cấp',
+                'title' => 'Phòng Khách Penthouse Hoàng Gia',
                 'style' => 'Modern Italian Luxury & Minimalist',
                 'area' => '35 - 45 m²',
-                'lighting' => 'Kính tràn viền Panorama đón nắng tự nhiên; khuyên dùng tone da cognac hoặc velvet trầm kết hợp chân kim loại mạ PVD để phản chiếu ánh sáng sang trọng.',
+                'lighting' => 'Kính tràn viền Panorama đón nắng tự nhiên; độ khuếch tán cao kết hợp ánh sáng hắt trần 3000K.',
+                'structural_analysis' => [
+                    'ceiling' => 'Trần thạch cao giật cấp âm đèn hắt LED CRI>95, cao độ thông thủy 3.2m thoáng đạt.',
+                    'floor' => 'Sàn đá cẩm thạch trắng Calacatta bóng mờ, chống trơn trượt tiêu chuẩn châu Âu.',
+                    'walls_windows' => 'Hệ vách kính Panorama khổ lớn đón trọn ánh sáng tự nhiên và view toàn cảnh thành phố.',
+                ],
+                'spatial_evaluation' => [
+                    'lighting' => 'Ánh sáng tự nhiên dồi dào từ hướng Đông Nam, dịu nhẹ buổi sớm và rực rỡ lúc ban trưa.',
+                    'pros' => 'Mặt bằng vuông vức, tầm nhìn thoáng đãng, trần cao tối ưu khả năng thông gió đối lưu tự nhiên.',
+                    'cons' => 'Bề mặt đá bóng dễ gây hiện tượng vang âm nhẹ; cần bố trí thảm Cashmere triệt tiêu âm phản xạ.',
+                ],
+                'layout_zoning' => [
+                    'focal_point' => 'Khu vực tâm điểm đối diện ban công - nơi đặt bộ sofa chính và bàn trà đôi nghệ thuật.',
+                    'furniture_placement' => 'Bố trí sofa chữ L bọc nỉ nhung cách vách kính 1.2m tạo hành lang luân chuyển khí.',
+                    'circulation' => 'Khoảng cách đệm giao thông tối thiểu 90cm quanh cụm bàn trà, đảm bảo lối đi thông thoáng.',
+                ],
+                'material_matrix' => [
+                    'recommended' => ['Da bò Ý tự nhiên Semi-Aniline', 'Đá Marble Calacatta nguyên khối', 'Thép không gỉ mạ Titan PVD'],
+                    'avoid' => ['Simili công nghiệp dễ bong tróc', 'Gương phản quang đối diện luồng nắng gắt'],
+                ],
                 'colors' => [
                     ['name' => 'Da Bò Cognac', 'hex' => '#9E5B32'],
                     ['name' => 'Đá Marble Carrara', 'hex' => '#E8ECEF'],
@@ -329,42 +348,102 @@ PROMPT;
                 'advice' => 'Không gian phòng khách lớn cần một bộ Sofa làm tâm điểm vững chãi. Bàn trà đôi đá cẩm thạch và đèn sàn vòm ánh kim sẽ tạo nên bố cục tam giác vàng hoàn hảo cho dinh thự.',
                 'product_ids' => [1, 5, 10], // Sofa Velvet Aurora, Bàn Trà Marble Aria, Đèn Sàn Solstice
                 'combo_name' => 'Bản Phối Cảnh: Đại Sảnh Penthouse Hoàng Gia',
+                'category_hint' => 'living',
             ],
             'scandi_apartment' => [
                 'title' => 'Căn Hộ Chung Cư Hiện Đại Bắc Âu',
                 'style' => 'Warm Scandinavian & Japandi Zen',
                 'area' => '22 - 28 m²',
                 'lighting' => 'Cửa ban công hướng Đông Nam ngập tràn ánh sáng; phù hợp với các chất liệu vải dệt thô mộc, gỗ sồi tự nhiên và màu kem ấm.',
+                'structural_analysis' => [
+                    'ceiling' => 'Trần thạch cao phẳng sơn trắng satin, chiều cao thông thủy tiêu chuẩn 2.7m.',
+                    'floor' => 'Sàn gỗ công nghiệp màu sồi sáng hèm khóa V chống ẩm.',
+                    'walls_windows' => 'Hệ cửa lùa kính 2 cánh dẫn ra ban công đón gió và cây xanh nhiệt đới.',
+                ],
+                'spatial_evaluation' => [
+                    'lighting' => 'Ánh sáng phản xạ mềm mại qua lớp rèm voan trắng, tạo cảm giác thư thái và thanh bình.',
+                    'pros' => 'Không gian liền mạch giữa phòng khách và phòng ăn, tận dụng tối đa ánh sáng tự nhiên.',
+                    'cons' => 'Diện tích giới hạn; cần tránh các món đồ đồ sộ chiếm lối đi để giữ cảm giác rộng mở.',
+                ],
+                'layout_zoning' => [
+                    'focal_point' => 'Góc tiếp khách hướng về mảng tường treo tivi hoặc tranh nghệ thuật tối giản.',
+                    'furniture_placement' => 'Sofa Modular phối ghế lounge rời linh hoạt, giải phóng trục di chuyển chính.',
+                    'circulation' => 'Hành lang di chuyển thông suốt tối thiểu 80cm kết nối thẳng ra ban công.',
+                ],
+                'material_matrix' => [
+                    'recommended' => ['Gỗ sồi tự nhiên Bắc Mỹ', 'Vải dệt Bouclé thô mộc', 'Gốm thủ công mộc mạc'],
+                    'avoid' => ['Kim loại bóng gương rườm rà', 'Vải nhung bóng bắt bụi'],
+                ],
                 'colors' => [
                     ['name' => 'Kem Sữa Oatmeal', 'hex' => '#F4ECE1'],
                     ['name' => 'Gỗ Sồi Tự Nhiên', 'hex' => '#C49A6C'],
                     ['name' => 'Xám Khói Mờ', 'hex' => '#9E9E9E'],
                     ['name' => 'Đen Nhám Minimalist', 'hex' => '#1F1F1F'],
                 ],
-                'advice' => 'Với diện tích chung cư, sofa góc chữ L hoặc modular kết hợp ghế lounge rời tạo cảm giác thông thoáng, giải phóng tối đa lối đi mà vẫn đảm bảo tiện nghi tiếp khách.',
+                'advice' => 'Với diện tích chung cư, sofa modular kết hợp ghế lounge rời tạo cảm giác thông thoáng, giải phóng tối đa lối đi mà vẫn đảm bảo tiện nghi đón khách tinh tế.',
                 'product_ids' => [2, 3, 5], // Sofa Modular Riviera, Ghế Lounge Ombré, Bàn Trà Marble Aria
                 'combo_name' => 'Bản Phối Cảnh: Không Gian Bắc Âu Ấm Cúng',
+                'category_hint' => 'living',
             ],
             'master_bedroom' => [
                 'title' => 'Phòng Ngủ Master Yên Bình & Thư Thái',
                 'style' => 'Contemporary Serene Sanctuary',
                 'area' => '25 - 35 m²',
                 'lighting' => 'Ánh sáng êm dịu 3000K; tối ưu giấc ngủ sâu với chất liệu gỗ tự nhiên, nệm bọc nỉ cao cấp và điểm nhấn gương phản chiếu chiều sâu.',
+                'structural_analysis' => [
+                    'ceiling' => 'Trần giật cấp nhẹ tích hợp họng gió điều hòa âm trần và rãnh rèm tự động 2 lớp.',
+                    'floor' => 'Sàn gỗ óc chó kỹ thuật xương cá ấm cúng, êm chân và cách âm phòng ngủ.',
+                    'walls_windows' => 'Vách đầu giường ốp gỗ bọc da nỉ tiêu âm; cửa sổ mở cánh lật hướng Nam.',
+                ],
+                'spatial_evaluation' => [
+                    'lighting' => 'Ánh sáng gián tiếp nhẹ nhàng, không gây chói mắt khi nằm trên giường thư giãn.',
+                    'pros' => 'Không gian riêng tư biệt lập, tĩnh lặng, độ ẩm và nhiệt độ ổn định quanh năm.',
+                    'cons' => 'Cần xử lý hướng giường ngủ tránh đối diện cửa phòng tắm hoặc gương soi.',
+                ],
+                'layout_zoning' => [
+                    'focal_point' => 'Chiếc giường ngủ vòm nghệ thuật Elysée đặt chính giữa trục đối xứng của căn phòng.',
+                    'furniture_placement' => 'Giường cách hai bên tường 70cm đặt tab đầu giường và đèn ngủ đối xứng.',
+                    'circulation' => 'Khoảng đệm cuối giường đến tủ áo tối thiểu 95cm để thao tác mở cánh tủ thoải mái.',
+                ],
+                'material_matrix' => [
+                    'recommended' => ['Gỗ óc chó Canaletto', 'Vải nhung dệt kim cao cấp', 'Kính màu trà sang trọng'],
+                    'avoid' => ['Gương soi chiếu thẳng vào giường', 'Đèn chùm pha lê nặng nề ngay đỉnh đầu'],
+                ],
                 'colors' => [
                     ['name' => 'Gỗ Óc Chó Walnut', 'hex' => '#4A3525'],
                     ['name' => 'Vải Nỉ Be Sand', 'hex' => '#E5DCCF'],
                     ['name' => 'Xanh Đêm Midnight', 'hex' => '#1E293B'],
                     ['name' => 'Ánh Kim Satin Gold', 'hex' => '#C5A059'],
                 ],
-                'advice' => 'Giường ngủ vòm bọc nệm kết hợp tủ áo kính âm tường và gương trang trí nghệ thuật sẽ biến phòng ngủ thành phòng suite khách sạn 5 sao ngay tại nhà.',
+                'advice' => 'Giường ngủ vòm bọc nệm kết hợp tủ áo cánh kính âm tường và gương trang trí nghệ thuật sẽ biến phòng ngủ thành phòng suite khách sạn 5 sao ngay tại nhà.',
                 'product_ids' => [7, 8, 9], // Giường Canopy Elysée, Tủ Áo Héritage, Gương Trang Trí Cascade
                 'combo_name' => 'Bản Phối Cảnh: Suite Nghỉ Dưỡng Master Hoàng Gia',
+                'category_hint' => 'bedroom',
             ],
             'dining_lounge' => [
                 'title' => 'Phòng Ăn & Bếp Mở Sang Trọng',
                 'style' => 'Neoclassic Luxury Dining',
                 'area' => '28 - 38 m²',
                 'lighting' => 'Hệ thống đèn thả bàn ăn ánh sáng vàng ấm 2700K kích thích vị giác và tạo không khí sum vầy đầm ấm cho gia đình.',
+                'structural_analysis' => [
+                    'ceiling' => 'Trần giật cấp viền phào chỉ PU thanh thoát, điểm xuyết đèn chùm pha lê hiện đại.',
+                    'floor' => 'Sàn gạch Ceramic khổ lớn vân mây chống bám dầu mỡ và dễ lau chùi.',
+                    'walls_windows' => 'Vách kính ngăn mùi cơ động giữa bếp nấu và khu vực bàn tiệc gia đình.',
+                ],
+                'spatial_evaluation' => [
+                    'lighting' => 'Chiếu sáng tập trung rọi xuống mặt bàn tiệc, làm nổi bật sắc thái ẩm thực thượng hạng.',
+                    'pros' => 'Mặt bằng mở thông thoáng, kết nối nhịp nhàng giữa đảo bếp và bàn ăn dài 8 ghế.',
+                    'cons' => 'Cần quạt hút thông gió công suất cao để giữ không khí luôn trong lành không ám mùi.',
+                ],
+                'layout_zoning' => [
+                    'focal_point' => 'Cụm bàn ăn mặt đá nguyên khối Sovereign và hệ đèn thả trang sức.',
+                    'furniture_placement' => 'Bàn ăn đặt tại tâm phòng, khoảng lùi ghế ngồi tối thiểu 75cm để đứng lên ngồi xuống thuận tiện.',
+                    'circulation' => 'Trục di chuyển từ bếp ra bàn ăn rộng rãi tối thiểu 100cm cho người phục vụ.',
+                ],
+                'material_matrix' => [
+                    'recommended' => ['Đá cẩm thạch nguyên phiến chống ố', 'Chân kim loại mạ vàng 24K chải xước', 'Da công nghiệp microfiber chống bám bẩn'],
+                    'avoid' => ['Vải bọc ghế khó tháo giặt', 'Mặt bàn kính dễ xước dăm'],
+                ],
                 'colors' => [
                     ['name' => 'Đá Marble Đen Tia Chớp', 'hex' => '#1C1C1E'],
                     ['name' => 'Vàng 24K Chải Xước', 'hex' => '#E5C158'],
@@ -374,6 +453,7 @@ PROMPT;
                 'advice' => 'Bàn ăn 8 ghế mặt đá kết hợp tủ bếp Provence tinh xảo là lựa chọn lý tưởng cho các bữa tiệc tối gia đình và đón tiếp đối tác sang trọng.',
                 'product_ids' => [6, 4, 12], // Bàn Ăn Sovereign, Ghế Đọc Sách Noir, Tủ Bếp Bespoke Provence
                 'combo_name' => 'Bản Phối Cảnh: Phòng Đại Tiệc Tân Cổ Điển',
+                'category_hint' => 'dining',
             ],
         ];
 
@@ -388,13 +468,15 @@ PROMPT;
             $selectedPreset['title'] = "Không Gian " . $desiredStyle;
         }
         if (!empty($colorTone)) {
-            $selectedPreset['advice'] = "Không gian được thiết kế nhấn mạnh tông màu {$colorTone}. " . $selectedPreset['advice'];
+            $selectedPreset['advice'] = "Không gian được định hình nhấn mạnh tông màu {$colorTone}. " . $selectedPreset['advice'];
         }
         if (!empty($userNote)) {
             $selectedPreset['advice'] .= " Ghi chú cá nhân: {$userNote}";
         }
 
-        // If user uploaded an image and Gemini is available, attempt multimodal vision analysis
+        $isAiVisionAnalyzed = false;
+
+        // If user uploaded an image and Gemini is available, attempt senior multimodal vision analysis
         if (($imageFile || $imageBase64) && $this->gemini->isConfigured()) {
             try {
                 $base64Data = '';
@@ -412,48 +494,121 @@ PROMPT;
                 }
 
                 if (!empty($base64Data)) {
-                    $userContextStr = "Thông tin khách hàng cung cấp: Diện tích: " . ($area ? $area . 'm²' : 'chưa xác định') . ", Tông màu: " . ($colorTone ?: 'tự do') . ", Phong cách: " . ($desiredStyle ?: 'hiện đại') . ", Ghi chú: " . ($userNote ?: 'không có');
-                    $visionPrompt = "Bạn là Giám đốc Kiến trúc GS Luxury. Hãy phân tích bức ảnh phòng này kết hợp thông tin sau: {$userContextStr}. Trả về JSON:
-                    {
-                      \"detected_room_type\": \"Tên loại phòng (vd: Phòng Khách Căn Hộ)\",
-                      \"detected_style\": \"Tên phong cách (vd: Modern Luxury / Scandinavian)\",
-                      \"estimated_area\": \"Diện tích ước lượng m2\",
-                      \"lighting_analysis\": \"Nhận xét ánh sáng trong ảnh 1 câu\",
-                      \"architect_advice\": \"Lời khuyên phối nội thất chuyên gia 2 câu\",
-                      \"color_palette\": [{\"name\": \"Tên màu\", \"hex\": \"#HEX\"}]
-                    }";
+                    $userContextStr = "Thông tin khách cung cấp: Diện tích: " . ($area ? $area . 'm²' : 'chưa xác định') . ", Tông màu: " . ($colorTone ?: 'tự do') . ", Phong cách mong muốn: " . ($desiredStyle ?: 'hiện đại') . ", Yêu cầu: " . ($userNote ?: 'không có');
+                    
+                    $visionPrompt = <<<PROMPT
+Bạn là Giám đốc Kiến trúc & Thiết kế Không gian Cấp cao của GS Luxury (Thương hiệu nội thất xa xỉ may đo).
+Hãy trực tiếp quan sát kỹ bức ảnh căn phòng thực tế này và thẩm định không gian thực tế theo 5 LỚP BÓC TÁCH KIẾN TRÚC CHUYÊN SÂU:
+
+Dữ liệu khách hàng: {$userContextStr}
+
+YÊU CẦU BÓC TÁCH CHÂN THỰC THEO ẢNH (KHÔNG DÙNG VĂN MẪU, PHẢI NHÌN ĐÚNG HIỆN TRẠNG ẢNH):
+- Lớp 1 (Kết cấu thực tế): Nhận diện cụ thể trần (trần phẳng/thạch cao/dầm bê tông, ước lượng chiều cao m), sàn (loại vật liệu sàn gỗ/gạch men/đá hoa cương, tông màu), tường và ô cửa sổ (số lượng cánh kính, hướng lấy sáng).
+- Lớp 2 (Ánh sáng & Đánh giá): Phân tích nguồn sáng tự nhiên, 1 ưu điểm mặt bằng và 1 thách thức/nhược điểm cần xử lý (ví dụ: góc tối, phòng hẹp, âm dội, dầm đè...).
+- Lớp 3 (Bố trí công năng): Điểm nhìn tiêu điểm chính (Focal point), vị trí đặt đồ nội thất chính (Sofa/Giường/Bàn ăn), khoảng cách luồng giao thông tối thiểu.
+- Lớp 4 (Ma trận vật liệu & Màu sắc): 3 chất liệu nên dùng, 2 chất liệu nên tránh, và 4 màu sắc HEX thực tế trích xuất từ các mảng màu chính trong ảnh.
+- Lớp 5 (Định hướng combo): Đặt tên bản đồ án phối cảnh sang trọng, lời khuyên KTS Trưởng sắc bén, và chỉ định category_hint ('living' | 'bedroom' | 'dining' | 'lighting').
+
+BẮT BUỘC CHỈ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG BỌC TRONG BẤT KỲ VĂN BẢN NGOÀI NÀO) CÓ CẤU TRÚC:
+{
+  "detected_room_type": "Tên loại phòng chuẩn (vd: Phòng Khách Căn Hộ Hiện Đại / Phòng Ngủ Master Sang Trọng)",
+  "detected_style": "Tên phong cách kiến trúc chuẩn",
+  "estimated_area": "Khoảng diện tích m2 ước lượng",
+  "concept_title": "Tên đồ án phối cảnh độc bản",
+  "structural_analysis": {
+    "ceiling": "Mô tả chi tiết trần nhà và chiều cao từ ảnh",
+    "floor": "Mô tả chi tiết sàn và màu sắc từ ảnh",
+    "walls_windows": "Mô tả chi tiết tường, khung cửa sổ từ ảnh"
+  },
+  "spatial_evaluation": {
+    "lighting": "Phân tích hướng sáng và chất lượng ánh sáng từ ảnh",
+    "pros": "Điểm mạnh kiến trúc nổi bật",
+    "cons": "Thách thức kiến trúc cần lưu ý khắc phục"
+  },
+  "layout_zoning": {
+    "focal_point": "Điểm nhìn tiêu điểm vàng của phòng",
+    "furniture_placement": "Vị trí đặt món nội thất chính tối ưu tỷ lệ",
+    "circulation": "Quy chuẩn luồng giao thông đi lại thông thoáng"
+  },
+  "material_matrix": {
+    "recommended": ["Vật liệu nên dùng 1", "Vật liệu nên dùng 2", "Vật liệu nên dùng 3"],
+    "avoid": ["Vật liệu nên tránh 1", "Vật liệu nên tránh 2"]
+  },
+  "color_palette": [
+    {"name": "Tên màu 1", "hex": "#HEX1"},
+    {"name": "Tên màu 2", "hex": "#HEX2"},
+    {"name": "Tên màu 3", "hex": "#HEX3"},
+    {"name": "Tên màu 4", "hex": "#HEX4"}
+  ],
+  "architect_advice": "Lời khuyên đắt giá của KTS Trưởng (2-3 câu mang tính giải pháp thực thi)",
+  "category_hint": "living"
+}
+PROMPT;
 
                     $geminiRes = $this->gemini->generateMultimodalContent($visionPrompt, $base64Data, $mimeType);
                     if (!isset($geminiRes['error']) && !empty($geminiRes['text'])) {
                         $parsed = $this->parseGeminiResponse($geminiRes['text']);
-                        if ($parsed && isset($parsed['detected_style'])) {
-                            $selectedPreset['title'] = $parsed['detected_room_type'] ?? $selectedPreset['title'];
+                        if ($parsed && isset($parsed['detected_room_type'])) {
+                            $isAiVisionAnalyzed = true;
+                            $selectedPreset['title'] = $parsed['detected_room_type'];
                             $selectedPreset['style'] = $desiredStyle ?: ($parsed['detected_style'] ?? $selectedPreset['style']);
                             $selectedPreset['area'] = $area ? ($area . ' m²') : ($parsed['estimated_area'] ?? $selectedPreset['area']);
-                            $selectedPreset['lighting'] = $parsed['lighting_analysis'] ?? $selectedPreset['lighting'];
+                            $selectedPreset['combo_name'] = $parsed['concept_title'] ?? ("Bản Phối Cảnh: " . $selectedPreset['title']);
+                            $selectedPreset['lighting'] = $parsed['spatial_evaluation']['lighting'] ?? ($parsed['lighting_analysis'] ?? $selectedPreset['lighting']);
                             $selectedPreset['advice'] = $parsed['architect_advice'] ?? $selectedPreset['advice'];
-                            if (!empty($parsed['color_palette'])) {
+                            
+                            if (!empty($parsed['structural_analysis'])) {
+                                $selectedPreset['structural_analysis'] = $parsed['structural_analysis'];
+                            }
+                            if (!empty($parsed['spatial_evaluation'])) {
+                                $selectedPreset['spatial_evaluation'] = $parsed['spatial_evaluation'];
+                            }
+                            if (!empty($parsed['layout_zoning'])) {
+                                $selectedPreset['layout_zoning'] = $parsed['layout_zoning'];
+                            }
+                            if (!empty($parsed['material_matrix'])) {
+                                $selectedPreset['material_matrix'] = $parsed['material_matrix'];
+                            }
+                            if (!empty($parsed['color_palette']) && is_array($parsed['color_palette'])) {
                                 $selectedPreset['colors'] = $parsed['color_palette'];
+                            }
+                            if (!empty($parsed['category_hint'])) {
+                                $selectedPreset['category_hint'] = $parsed['category_hint'];
                             }
                         }
                     }
                 }
             } catch (\Exception $e) {
-                // Graceful fallback to preset
+                // Graceful fallback to rich preset
             }
         }
 
-        // Fetch products for combo package
-        $comboProducts = Product::whereIn('id', $selectedPreset['product_ids'])
+        // Dynamically select products for the combo package
+        $categoryHint = $selectedPreset['category_hint'] ?? 'living';
+        $productIds = match ($categoryHint) {
+            'bedroom' => [7, 8, 9],    // Giường Canopy Elysée, Tủ Áo Héritage, Gương Cascade
+            'dining' => [6, 4, 12],    // Bàn Ăn Sovereign, Ghế Đọc Sách Noir, Tủ Bếp Provence
+            default => [1, 5, 10],     // Sofa Velvet Aurora, Bàn Trà Marble Aria, Đèn Sàn Solstice
+        };
+
+        if (!empty($selectedPreset['product_ids'])) {
+            $productIds = $selectedPreset['product_ids'];
+        }
+
+        $comboProducts = Product::whereIn('id', $productIds)
             ->with(['images', 'category'])
             ->get();
 
-        if ($comboProducts->isEmpty()) {
-            $comboProducts = Product::where('status', 'active')->take(3)->get();
+        if ($comboProducts->count() < 3) {
+            $comboProducts = Product::where('status', 'active')
+                ->where('stock_quantity', '>', 0)
+                ->with(['images', 'category'])
+                ->take(3)
+                ->get();
         }
 
         $originalTotal = (float) $comboProducts->sum('price');
-        $discountPercent = 10; // Giảm giá 10% khi mua trọn bộ combo do AI gợi ý
+        $discountPercent = 10; // Giảm giá 10% khi mua trọn bộ combo
         $comboPrice = round($originalTotal * 0.9);
         $savings = $originalTotal - $comboPrice;
 
@@ -463,6 +618,13 @@ PROMPT;
                 1 => 'Điểm nhấn hòa sắc (Accent Companion)',
                 2 => 'Ánh sáng & Phụ kiện nghệ thuật (Finishing Touch)',
             ];
+            
+            $placementReasons = [
+                0 => "Tâm điểm không gian, cân bằng hoàn hảo với tỷ lệ {$selectedPreset['area']} và tôn vinh đường nét kiến trúc.",
+                1 => "Hòa sắc tự nhiên với sàn và tường, tạo độ sâu tương phản sang trọng không gây rối mắt.",
+                2 => "Điểm xuyết ánh sáng và vật liệu phản xạ, hoàn thiện trọn vẹn thẩm mỹ của KTS Trưởng.",
+            ];
+
             return [
                 'id' => $p->id,
                 'name' => $p->name,
@@ -473,21 +635,46 @@ PROMPT;
                 'dimensions' => $p->dimensions ?? 'Tiêu chuẩn quốc tế',
                 'image' => ($p->images->first()?->image_url) ?? '/images/hero-banner.jpg',
                 'role' => $roles[$idx] ?? 'Phối kiện hoàn hảo',
-                'reason' => "Tương thích 98% với phong cách {$selectedPreset['style']}, tôn vinh đường nét kiến trúc.",
+                'reason' => $placementReasons[$idx] ?? "Tương thích 98% với phong cách {$selectedPreset['style']}.",
             ];
         });
 
         return response()->json([
             'success' => true,
+            'meta' => [
+                'engine' => $isAiVisionAnalyzed ? 'gemini_3.5_flash_multimodal_architect' : 'architectural_ruleset_studio',
+                'analyzed_at' => now()->toISOString(),
+                'version' => '2.5.0-luxury',
+            ],
             'data' => [
                 'preset_id' => $presetId,
                 'detected_room_type' => $selectedPreset['title'],
                 'detected_style' => $selectedPreset['style'],
                 'estimated_area' => $selectedPreset['area'],
                 'lighting_analysis' => $selectedPreset['lighting'],
+                'structural_analysis' => $selectedPreset['structural_analysis'] ?? [
+                    'ceiling' => 'Trần thạch cao phẳng kết hợp họng gió âm trần cao độ 3.0m',
+                    'floor' => 'Sàn gỗ kỹ thuật chống xước hoặc đá tự nhiên đồng bộ',
+                    'walls_windows' => 'Hệ vách phẳng đón sáng tự nhiên',
+                ],
+                'spatial_evaluation' => $selectedPreset['spatial_evaluation'] ?? [
+                    'lighting' => $selectedPreset['lighting'],
+                    'pros' => 'Mặt bằng bố cục mạch lạc, tối ưu ánh sáng tự nhiên',
+                    'cons' => 'Cần xử lý vật liệu mềm tiêu âm và phân vùng lối đi',
+                ],
+                'layout_zoning' => $selectedPreset['layout_zoning'] ?? [
+                    'focal_point' => 'Khu vực tiếp khách trung tâm đón tầm nhìn đắt giá nhất',
+                    'furniture_placement' => 'Đặt sofa chính đối diện vách điểm nhấn, cân bằng thị giác',
+                    'circulation' => 'Hành lang đệm giao thông tối thiểu 85cm - 100cm',
+                ],
+                'material_matrix' => $selectedPreset['material_matrix'] ?? [
+                    'recommended' => ['Da bò thuộc Ý cao cấp', 'Gỗ tự nhiên sấy tiêu chuẩn', 'Đá cẩm thạch Calacatta'],
+                    'avoid' => ['Vật liệu bắt bụi dày', 'Kính phản quang đối diện nguồn sáng'],
+                ],
                 'architect_advice' => $selectedPreset['advice'],
                 'color_palette' => $selectedPreset['colors'],
-                'confidence_score' => 97.8,
+                'confidence_score' => $isAiVisionAnalyzed ? 98.6 : 96.5,
+                'is_ai_vision' => $isAiVisionAnalyzed,
                 'combo_package' => [
                     'name' => $selectedPreset['combo_name'],
                     'discount_percent' => $discountPercent,
@@ -498,5 +685,68 @@ PROMPT;
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Parse Gemini JSON response safely
+     */
+    protected function parseGeminiResponse(string $raw): ?array
+    {
+        $text = trim($raw);
+        if (empty($text)) {
+            return null;
+        }
+
+        // Remove markdown code fences if present (e.g. ```json ... ```)
+        if (preg_match('/```(?:json)?\s*([\s\S]*?)\s*```/i', $text, $matches)) {
+            $text = trim($matches[1]);
+        }
+
+        // Try direct json_decode
+        $decoded = json_decode($text, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        // Try finding the first '{' and last '}'
+        $firstBrace = strpos($text, '{');
+        $lastBrace = strrpos($text, '}');
+        if ($firstBrace !== false && $lastBrace !== false && $lastBrace > $firstBrace) {
+            $substring = substr($text, $firstBrace, $lastBrace - $firstBrace + 1);
+            $decoded = json_decode($substring, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Map room type key to Vietnamese label
+     */
+    protected function getRoomTypeLabel(string $type): string
+    {
+        return match (strtolower(trim($type))) {
+            'bedroom', 'phong_ngu', 'bed' => 'Phòng Ngủ Master',
+            'dining', 'phong_an', 'kitchen' => 'Phòng Ăn & Bếp Mở',
+            'office', 'phong_lam_viec' => 'Phòng Làm Việc & Thư Viện',
+            default => 'Phòng Khách Sang Trọng',
+        };
+    }
+
+    /**
+     * Generate match reason for product in rule-based mode
+     */
+    protected function getMatchReason(Product $product, ?string $category): string
+    {
+        return match ($category) {
+            'sofa' => "Sofa thiết kế chuẩn tỷ lệ vàng, da bọc thủ công tỉ mỉ từng đường kim mũi chỉ.",
+            'dining' => "Bàn ăn mặt đá cao cấp chịu lực, tạo điểm nhấn ấm cúng cho không gian tiệc tối gia đình.",
+            'coffee_table' => "Mặt đá vân mây tự nhiên kết hợp chân kim loại ánh kim tôn vinh đẳng cấp phòng khách.",
+            'bedroom' => "Đường nét thanh lịch, độ đàn hồi tiêu chuẩn khách sạn 5 sao mang lại giấc ngủ sâu.",
+            'lighting' => "Khúc xạ ánh sáng nghệ thuật, tạo hiệu ứng thị giác lung linh cho buổi tối.",
+            default => "Được chế tác từ vật liệu nhập khẩu cao cấp, phù hợp với phong cách sống thời thượng.",
+        };
     }
 }

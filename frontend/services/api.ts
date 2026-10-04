@@ -1117,9 +1117,29 @@ export type AiRoomAnalysisResult = {
   detected_style: string;
   estimated_area: string;
   lighting_analysis: string;
+  structural_analysis?: {
+    ceiling: string;
+    floor: string;
+    walls_windows: string;
+  };
+  spatial_evaluation?: {
+    lighting: string;
+    pros: string;
+    cons: string;
+  };
+  layout_zoning?: {
+    focal_point: string;
+    furniture_placement: string;
+    circulation: string;
+  };
+  material_matrix?: {
+    recommended: string[];
+    avoid: string[];
+  };
   architect_advice: string;
   color_palette: AiColorPaletteItem[];
   confidence_score: number;
+  is_ai_vision?: boolean;
   combo_package: {
     name: string;
     discount_percent: number;
