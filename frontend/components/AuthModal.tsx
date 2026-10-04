@@ -47,7 +47,11 @@ export default function AuthModal() {
     setLoading(false);
 
     if (res.success) {
-      setSuccessMessage("Đăng nhập thành công!");
+      if (res.user?.role === "admin") {
+        setSuccessMessage("Đăng nhập quyền Quản Trị Viên thành công!");
+      } else {
+        setSuccessMessage("Đăng nhập thành công!");
+      }
       setTimeout(() => {
         closeAuth();
         setSuccessMessage("");
@@ -111,6 +115,15 @@ export default function AuthModal() {
       email: "customer@gmail.com",
       password: "Customer@123456",
     });
+    setErrorMessage("");
+  };
+
+  const fillTestAdmin = () => {
+    setLoginData({
+      email: "admin@gsluxury.vn",
+      password: "Admin@123456",
+    });
+    setErrorMessage("");
   };
 
   return (
@@ -274,14 +287,26 @@ export default function AuthModal() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-1">
-                <button
-                  type="button"
-                  onClick={fillTestCustomer}
-                  className="text-xs text-gold hover:underline font-medium"
-                >
-                  ⚡ Điền nhanh tài khoản mẫu
-                </button>
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={fillTestCustomer}
+                    className="text-xs text-gold hover:underline font-medium"
+                    title="Tài khoản khách: customer@gmail.com"
+                  >
+                    ⚡ Khách
+                  </button>
+                  <span className="text-espresso/30 text-xs">•</span>
+                  <button
+                    type="button"
+                    onClick={fillTestAdmin}
+                    className="text-xs text-amber-700 hover:text-amber-800 hover:underline font-semibold"
+                    title="Tài khoản Quản trị: admin@gsluxury.vn"
+                  >
+                    🛡️ Admin
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={() => {

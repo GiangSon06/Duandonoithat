@@ -96,7 +96,7 @@ type StoreContextValue = {
   isAuthLoading: boolean;
   openAuth: (mode?: "login" | "register" | "forgot") => void;
   closeAuth: () => void;
-  loginUser: (data: { email: string; password: string }) => Promise<{ success: boolean; message?: string }>;
+  loginUser: (data: { email: string; password: string }) => Promise<{ success: boolean; message?: string; user?: any }>;
   registerUser: (data: {
     name: string;
     email: string;
@@ -461,7 +461,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("gs_auth_token", res.data.token);
         localStorage.setItem("gs_auth_user", JSON.stringify(res.data.user));
         setAuthOpen(false);
-        return { success: true, message: res.message };
+        return { success: true, message: res.message, user: res.data.user };
       }
       return { success: false, message: res.message || "Đăng nhập không thành công" };
     } catch (err: any) {

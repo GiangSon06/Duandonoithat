@@ -40,8 +40,13 @@ export default function LoginPage() {
       const res = await loginUser({ email, password });
 
       if (res.success) {
-        showToast({ type: "success", title: "Đăng nhập thành công", message: "Chào mừng bạn trở lại GS Luxury!" });
-        nextRouter.push(redirect);
+        showToast({
+          type: "success",
+          title: "Đăng nhập thành công",
+          message: res.user?.role === "admin" ? "Chào mừng Quản trị viên!" : "Chào mừng bạn trở lại GS Luxury!"
+        });
+        const target = redirect === "/" && res.user?.role === "admin" ? "/admin" : redirect;
+        nextRouter.push(target);
         nextRouter.refresh();
       } else {
         setError(res.message || "Đăng nhập không thành công");
@@ -127,13 +132,33 @@ export default function LoginPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 accent-gold rounded"
-                  />
-                  <span className="text-xs text-espresso/70">Ghi nhớ đăng nhập</span>
-                </label>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail("customer@gmail.com");
+                      setPassword("Customer@123456");
+                      setError("");
+                    }}
+                    className="text-[11px] text-gold hover:underline font-medium"
+                    title="Tài khoản khách: customer@gmail.com"
+                  >
+                    ⚡ Khách
+                  </button>
+                  <span className="text-espresso/30 text-xs">•</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail("admin@gsluxury.vn");
+                      setPassword("Admin@123456");
+                      setError("");
+                    }}
+                    className="text-[11px] text-amber-700 hover:text-amber-800 hover:underline font-semibold"
+                    title="Tài khoản Quản trị: admin@gsluxury.vn"
+                  >
+                    🛡️ Admin
+                  </button>
+                </div>
                 <Link
                   href="/forgot-password"
                   className="text-xs text-gold hover:underline"

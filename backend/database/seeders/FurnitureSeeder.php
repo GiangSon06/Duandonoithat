@@ -30,7 +30,7 @@ class FurnitureSeeder extends Seeder
                 'name' => 'GS Luxury Administrator',
                 'phone' => '0901234567',
                 'role' => 'admin',
-                'password' => Hash::make('GsLuxury#2026!Secure'),
+                'password' => Hash::make('Admin@123456'),
                 'address' => 'Tòa nhà GS Luxury Tower, Hoàn Kiếm, Hà Nội',
             ]
         );
