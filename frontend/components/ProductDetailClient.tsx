@@ -308,7 +308,8 @@ export default function ProductDetailClient({ product }: { product: any }) {
               <ProductViewer3D
                 productName={product.name}
                 basePrice={product.price}
-                category={product.categorySlug || "sofa"}
+                category={product.categorySlug || product.category?.slug || (typeof product.category === "string" ? product.category : product.category?.name) || "sofa"}
+                productId={String(product.id || product.slug || "")}
               />
             </div>
           )}
