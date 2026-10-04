@@ -43,6 +43,7 @@ import { formatPrice } from "@/lib/products";
 import { aiRoomStylistService, AiRoomAnalysisResult } from "@/services/api";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
 import SpatialFloorplanCheck from "@/components/SpatialFloorplanCheck";
+import InteractiveRoom3DStudio, { StagedItem3D } from "@/components/InteractiveRoom3DStudio";
 
 const PRESET_ROOMS = [
   {
@@ -99,6 +100,7 @@ export default function AiRoomStylistPage() {
   const [addedCombo, setAddedCombo] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [dossierId, setDossierId] = useState("GSAI-2026-X89");
+  const [visualMode, setVisualMode] = useState<"3d" | "compare">("3d");
 
   const handleBookConsultation = () => {
     if (!result) return;
@@ -246,6 +248,38 @@ export default function AiRoomStylistPage() {
     setTimeout(() => {
       openCart();
     }, 400);
+  };
+
+  const handleAddToCartSingle = (item: StagedItem3D | any) => {
+    addToCart(
+      {
+        id: item.id,
+        name: item.name,
+        slug: item.id,
+        price: item.price,
+        original_price: item.price,
+        category: { id: 1, name: item.role || "Nội thất", slug: "luxury" },
+        dimensions: item.dimensions,
+        material: item.material,
+        images: [{ id: 1, product_id: item.id, image_url: item.image, is_primary: true, sort_order: 1 }],
+        sku: `GSL-AI-${item.id}`,
+        stock_quantity: 10,
+        sold_count: 5,
+        rating_avg: 5,
+        rating_count: 12,
+        is_featured: true,
+        is_bestseller: true,
+        is_new: true,
+        is_active: true,
+      },
+      1
+    );
+    showToast({
+      type: "success",
+      title: "Đã thêm vào giỏ hàng",
+      message: `${item.name} đã được thêm vào giỏ.`,
+    });
+    openCart();
   };
 
   return (
@@ -452,7 +486,7 @@ export default function AiRoomStylistPage() {
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-gold via-[#F0D8A8] to-gold text-charcoal font-semibold text-xs uppercase tracking-widest2 shadow-xl shadow-gold/25 hover:brightness-110 active:scale-95 transition-all duration-200 disabled:opacity-50 inline-flex items-center justify-center gap-2.5 cursor-pointer"
               >
                 <Sparkles size={16} className={isScanning ? "animate-spin" : ""} />
-                <span>{isScanning ? "AI Đang Quét & Phân Tích Không Gian..." : "Kích Hoạt Phân Tích Bằng AI"}</span>
+                <span>{isScanning ? "AI Đang Dựng Mô Hình Không Gian 3D..." : "Phân Tích Ảnh & Dựng Không Gian 3D"}</span>
               </button>
             </div>
           </div>
@@ -469,10 +503,10 @@ export default function AiRoomStylistPage() {
 
               <div>
                 <h3 className="font-serif text-xl text-champagne">
-                  Hệ Thống Đang Xử Lý Không Gian Thực Tế
+                  Hệ Thống Đang Xử Lý &amp; Tái Lập Không Gian 3D
                 </h3>
                 <p className="text-xs text-beige/60 mt-1 font-mono">
-                  Mô hình Vision AI đang bóc tách từng lớp điểm ảnh...
+                  Mô hình Vision AI đang bóc tách kết cấu và gắn sản phẩm 3D vào phòng...
                 </p>
               </div>
 
@@ -480,19 +514,19 @@ export default function AiRoomStylistPage() {
               <div className="max-w-md mx-auto space-y-2.5 text-left text-xs font-mono">
                 <div className={`flex items-center gap-2.5 transition-colors ${scanStep >= 1 ? "text-emerald-400" : "text-beige/30"}`}>
                   <CheckCircle2 size={15} />
-                  <span>[01/04] Nhận diện trần nhà, tường &amp; hướng cửa sổ tự nhiên</span>
+                  <span>[01/04] Nhận diện vách tường, cao độ trần &amp; hướng cửa sổ tự nhiên</span>
                 </div>
                 <div className={`flex items-center gap-2.5 transition-colors ${scanStep >= 2 ? "text-emerald-400" : "text-beige/30"}`}>
                   <CheckCircle2 size={15} />
-                  <span>[02/04] Đo đạc diện tích &amp; xác định tỷ lệ kiến trúc tương thích</span>
+                  <span>[02/04] Tái lập cấu trúc không gian 3 chiều (3D Mesh) chuẩn tỷ lệ 1:1</span>
                 </div>
                 <div className={`flex items-center gap-2.5 transition-colors ${scanStep >= 3 ? "text-emerald-400" : "text-beige/30"}`}>
                   <CheckCircle2 size={15} />
-                  <span>[03/04] Trích xuất bảng mã hòa sắc HEX &amp; độ tương phản vật liệu</span>
+                  <span>[03/04] Gắn sản phẩm 3D đề xuất (Sofa, bàn trà, đèn) vào tọa độ mặt bằng</span>
                 </div>
                 <div className={`flex items-center gap-2.5 transition-colors ${scanStep >= 4 ? "text-emerald-400" : "text-beige/30"}`}>
                   <CheckCircle2 size={15} />
-                  <span>[04/04] Phối trọn bộ combo nội thất GS Luxury và áp mã ưu đãi 10%</span>
+                  <span>[04/04] Khởi tạo studio 3D WebGL cho phép bạn tương tác xoay 360° tự do</span>
                 </div>
               </div>
             </div>
@@ -547,44 +581,97 @@ export default function AiRoomStylistPage() {
                 </div>
               </div>
 
-              {/* SECTION: INTERACTIVE BEFORE / AFTER STAGING VIEWER */}
+              {/* SECTION: 3D SPATIAL STUDIO & BEFORE/AFTER VIEWER */}
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="w-2 h-2 rounded-full bg-gold animate-ping" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
                       <span className="text-[11px] font-mono uppercase tracking-widest2 text-gold font-semibold">
-                        Trực Quan Hóa Không Gian Độc Bản
+                        Không Gian 3D Trực Quan Tương Tác
                       </span>
                     </div>
                     <h3 className="font-serif text-xl sm:text-2xl text-champagne font-normal">
-                      Phối Cảnh Chân Thực: Hiện Trạng &amp; Hoàn Thiện
+                      Phối Cảnh Không Gian Thực Vào 3D Sống Động
                     </h3>
                     <p className="text-xs text-beige/65 mt-0.5">
-                      Kéo thanh trượt để so sánh trực tiếp phòng thực tế và căn phòng sau khi bày biện nội thất GS Luxury
+                      {visualMode === "3d"
+                        ? "Không gian 3D WebGL: Xoay 360°, đổi góc nhìn camera, đổi ánh sáng và bấm vào từng món đồ để xem bóc tách chi tiết."
+                        : "Kéo thanh trượt để so sánh trực tiếp phòng thực tế và căn phòng sau khi bày biện nội thất GS Luxury."}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-500/20 self-start sm:self-auto">
-                    <Sparkles size={14} className="shrink-0" />
-                    <span>Tỷ Lệ Quang Học 1:1 Chuẩn Khổ Phòng</span>
+                  {/* Mode Switcher Tabs */}
+                  <div className="flex items-center bg-black/60 border border-white/15 rounded-2xl p-1 shadow-lg shrink-0">
+                    <button
+                      onClick={() => setVisualMode("3d")}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
+                        visualMode === "3d"
+                          ? "bg-gradient-to-r from-gold via-[#F0D8A8] to-gold text-charcoal shadow-md"
+                          : "text-beige/60 hover:text-white"
+                      }`}
+                    >
+                      <Sparkles size={14} />
+                      <span>Studio 3D Realtime (360°)</span>
+                    </button>
+
+                    <button
+                      onClick={() => setVisualMode("compare")}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
+                        visualMode === "compare"
+                          ? "bg-gradient-to-r from-gold via-[#F0D8A8] to-gold text-charcoal shadow-md"
+                          : "text-beige/60 hover:text-white"
+                      }`}
+                    >
+                      <Layers size={14} />
+                      <span>So Sánh Ảnh 2D</span>
+                    </button>
                   </div>
                 </div>
 
-                <BeforeAfterSlider
-                  beforeImage={
-                    result.before_image_url ||
-                    (activeTab === "upload" && customImage
-                      ? customImage
-                      : `/images/staged/penthouse_before.jpg`)
-                  }
-                  afterImage={
-                    result.staged_image_url ||
-                    `/images/staged/penthouse_after.jpg`
-                  }
-                  roomTitle={result.detected_room_type}
-                  styleName={result.detected_style}
-                />
+                {visualMode === "3d" ? (
+                  <InteractiveRoom3DStudio
+                    roomType={result.detected_room_type}
+                    styleName={result.detected_style}
+                    roomArea={result.floorplan_data?.room_area || result.estimated_area || roomArea}
+                    originalImage={
+                      result.before_image_url ||
+                      (activeTab === "upload" && customImage
+                        ? customImage
+                        : `/images/staged/penthouse_before.jpg`)
+                    }
+                    items={result.combo_package?.items?.map((item, idx) => ({
+                      id: item.id,
+                      name: item.name,
+                      role: item.role,
+                      material: item.material,
+                      dimensions: item.dimensions,
+                      price: item.price,
+                      image: item.image,
+                      reason: item.reason,
+                      badge: idx === 0 ? "Tâm điểm" : idx === 1 ? "Bàn trà" : "Ghế lounge",
+                      modelType: (idx === 0 ? "sofa" : idx === 1 ? "table" : "chair") as any,
+                    }))}
+                    onAddToCart={handleAddToCartSingle}
+                    onAddComboToCart={handleAddAllToCart}
+                    onBookConsultation={handleBookConsultation}
+                  />
+                ) : (
+                  <BeforeAfterSlider
+                    beforeImage={
+                      result.before_image_url ||
+                      (activeTab === "upload" && customImage
+                        ? customImage
+                        : `/images/staged/penthouse_before.jpg`)
+                    }
+                    afterImage={
+                      result.staged_image_url ||
+                      `/images/staged/penthouse_after.jpg`
+                    }
+                    roomTitle={result.detected_room_type}
+                    styleName={result.detected_style}
+                  />
+                )}
               </div>
 
               {/* SECTION: 2D SPATIAL FLOORPLAN & CIRCULATION CLEARANCE */}
