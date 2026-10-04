@@ -1,6 +1,20 @@
 // services/api.ts — GS Luxury Backend API Service Client
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+export const getApiBaseUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host.includes("onrender.com") || host.includes("vercel.app")) {
+      return "https://duandonoithat0512.onrender.com/api";
+    }
+  }
+  if (process.env.NODE_ENV === "production") {
+    return "https://duandonoithat0512.onrender.com/api";
+  }
+  return "http://127.0.0.1:8000/api";
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export type ApiResponse<T> = {
   success: boolean;
@@ -388,7 +402,8 @@ export type AdminCustomer = {
 
 // Helper fetch wrapper
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T> | { success: false; status: number; message: string; errors?: Record<string, string[]> }> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}${endpoint}`;
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
@@ -404,25 +419,33 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     }
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  const data = await response.json();
+    const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    // Return structured error instead of throwing
+    if (!response.ok) {
+      return {
+        success: false,
+        status: response.status,
+        message: data.message || "Đã xảy ra lỗi khi kết nối máy chủ.",
+        errors: data.errors,
+        data: data.data,
+      } as any;
+    }
+
+    return data as ApiResponse<T>;
+  } catch (err: any) {
     return {
       success: false,
-      status: response.status,
-      message: data.message || "Đã xảy ra lỗi khi kết nối máy chủ.",
-      errors: data.errors,
-      data: data.data,
-    } as any;
+      status: 0,
+      message: err?.message || "Không thể kết nối đến máy chủ API.",
+      data: null as any,
+    };
   }
-
-  return data as ApiResponse<T>;
 }
 
 // 1. Authentication Service

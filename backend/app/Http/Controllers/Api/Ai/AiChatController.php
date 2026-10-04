@@ -34,7 +34,30 @@ class AiChatController extends Controller
 
         // 2. Try Gemini AI if configured
         if ($this->gemini->isConfigured()) {
-            return $this->handleWithGemini($message, $lowerMsg);
+            $geminiRes = $this->handleWithGemini($message, $lowerMsg);
+            if ($geminiRes->getData()->success ?? false) {
+                return $geminiRes;
+            }
+        }
+
+        // 2b. Simple Math / Calculator check
+        if (preg_match('/([0-9\.]+)\s*([\+\-\*\/xX])\s*([0-9\.]+)/', $lowerMsg, $calc)) {
+            $n1 = (float) $calc[1];
+            $op = strtolower($calc[2]);
+            $n2 = (float) $calc[3];
+            $ans = match ($op) {
+                '+' => $n1 + $n2,
+                '-' => $n1 - $n2,
+                '*', 'x' => $n1 * $n2,
+                '/' => $n2 != 0 ? round($n1 / $n2, 2) : 'không xác định',
+                default => 0,
+            };
+            $reply = "Dạ, kết quả {$n1} {$op} {$n2} = **{$ans}** ạ! Quý khách có cần em hỗ trợ tính toán diện tích phòng, tư vấn phối màu hay gợi ý các mẫu nội thất cho tư gia không ạ?";
+            return response()->json([
+                'success' => true,
+                'meta' => ['engine' => 'smart_calc_v1', 'processed_at' => now()->toISOString()],
+                'data' => ['reply' => $reply, 'products' => []],
+            ]);
         }
 
         // 3. Fallback to rule-based
