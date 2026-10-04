@@ -41,34 +41,40 @@ import { useStore } from "@/components/StoreContext";
 import { useToast } from "@/components/ToastProvider";
 import { formatPrice } from "@/lib/products";
 import { aiRoomStylistService, AiRoomAnalysisResult } from "@/services/api";
+import BeforeAfterSlider from "@/components/BeforeAfterSlider";
+import SpatialFloorplanCheck from "@/components/SpatialFloorplanCheck";
 
 const PRESET_ROOMS = [
   {
     id: "penthouse_living",
     title: "Phòng Khách Penthouse",
     style: "Modern Italian Luxury",
-    image: "/images/hero-banner.jpg",
+    image: "/images/staged/penthouse_after.jpg",
+    before_image: "/images/staged/penthouse_before.jpg",
     description: "Đại sảnh thông tầng, cửa kính panorama đón nắng và sàn đá tự nhiên.",
   },
   {
     id: "scandi_apartment",
     title: "Căn Hộ Chung Cư",
     style: "Warm Scandinavian & Japandi",
-    image: "/images/sofa-3.jpg",
+    image: "/images/staged/apartment_after.jpg",
+    before_image: "/images/staged/apartment_before.jpg",
     description: "Không gian mở ấm cúng, tối ưu diện tích và ánh sáng ban công.",
   },
   {
     id: "master_bedroom",
     title: "Phòng Ngủ Master",
     style: "Contemporary Serene",
-    image: "/images/bed-1.jpg",
+    image: "/images/staged/bedroom_after.jpg",
+    before_image: "/images/staged/bedroom_before.jpg",
     description: "Phòng ngủ lớn tiện nghi cao cấp, tông màu tĩnh tại thư giãn.",
   },
   {
     id: "dining_lounge",
     title: "Phòng Ăn & Bếp Mở",
     style: "Neoclassic Dining",
-    image: "/images/dining-table-1.jpg",
+    image: "/images/staged/dining_after.jpg",
+    before_image: "/images/staged/dining_before.jpg",
     description: "Không gian tiệc gia đình sang trọng với bàn ăn lớn và tủ rượu.",
   },
 ];
@@ -540,6 +546,59 @@ export default function AiRoomStylistPage() {
                   </div>
                 </div>
               </div>
+
+              {/* SECTION: INTERACTIVE BEFORE / AFTER STAGING VIEWER */}
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="w-2 h-2 rounded-full bg-gold animate-ping" />
+                      <span className="text-[11px] font-mono uppercase tracking-widest2 text-gold font-semibold">
+                        Trực Quan Hóa Không Gian Độc Bản
+                      </span>
+                    </div>
+                    <h3 className="font-serif text-xl sm:text-2xl text-champagne font-normal">
+                      Phối Cảnh Chân Thực: Hiện Trạng &amp; Hoàn Thiện
+                    </h3>
+                    <p className="text-xs text-beige/65 mt-0.5">
+                      Kéo thanh trượt để so sánh trực tiếp phòng thực tế và căn phòng sau khi bày biện nội thất GS Luxury
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-500/20 self-start sm:self-auto">
+                    <Sparkles size={14} className="shrink-0" />
+                    <span>Tỷ Lệ Quang Học 1:1 Chuẩn Khổ Phòng</span>
+                  </div>
+                </div>
+
+                <BeforeAfterSlider
+                  beforeImage={
+                    result.before_image_url ||
+                    (activeTab === "upload" && customImage
+                      ? customImage
+                      : `/images/staged/penthouse_before.jpg`)
+                  }
+                  afterImage={
+                    result.staged_image_url ||
+                    `/images/staged/penthouse_after.jpg`
+                  }
+                  roomTitle={result.detected_room_type}
+                  styleName={result.detected_style}
+                />
+              </div>
+
+              {/* SECTION: 2D SPATIAL FLOORPLAN & CIRCULATION CLEARANCE */}
+              <SpatialFloorplanCheck
+                roomArea={result.floorplan_data?.room_area || result.estimated_area || roomArea}
+                roomWidth={result.floorplan_data?.room_width || 4.8}
+                roomLength={result.floorplan_data?.room_length || 7.2}
+                sofaName={result.floorplan_data?.sofa_name || result.combo_package?.items?.[0]?.name || "Sofa Modular Riviera 3 Chỗ"}
+                sofaDimensions={result.floorplan_data?.sofa_dimensions || result.combo_package?.items?.[0]?.dimensions || "280 x 105 x 82 cm"}
+                tableDimensions={result.floorplan_data?.table_dimensions || result.combo_package?.items?.[1]?.dimensions || "120 x 70 x 42 cm"}
+                balconyClearance={result.floorplan_data?.balcony_clearance || 115}
+                mainDoorClearance={result.floorplan_data?.main_door_clearance || 135}
+                coveragePercent={result.floorplan_data?.coverage_percent || 24.5}
+              />
 
               {/* 5-LAYER ARCHITECTURAL BLUEPRINT GRID */}
               <div className="space-y-6">

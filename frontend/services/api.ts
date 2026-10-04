@@ -1117,6 +1117,19 @@ export type AiRoomAnalysisResult = {
   detected_style: string;
   estimated_area: string;
   lighting_analysis: string;
+  staged_image_url?: string;
+  before_image_url?: string;
+  floorplan_data?: {
+    room_width?: number;
+    room_length?: number;
+    room_area?: number | string;
+    balcony_clearance?: number;
+    main_door_clearance?: number;
+    coverage_percent?: number;
+    sofa_name?: string;
+    sofa_dimensions?: string;
+    table_dimensions?: string;
+  };
   structural_analysis?: {
     ceiling: string;
     floor: string;

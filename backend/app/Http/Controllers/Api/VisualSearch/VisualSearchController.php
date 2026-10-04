@@ -349,6 +349,19 @@ PROMPT;
                 'product_ids' => [1, 5, 10], // Sofa Velvet Aurora, Bàn Trà Marble Aria, Đèn Sàn Solstice
                 'combo_name' => 'Bản Phối Cảnh: Đại Sảnh Penthouse Hoàng Gia',
                 'category_hint' => 'living',
+                'before_image_url' => '/images/staged/penthouse_before.jpg',
+                'staged_image_url' => '/images/staged/penthouse_after.jpg',
+                'floorplan_data' => [
+                    'room_width' => 5.2,
+                    'room_length' => 7.8,
+                    'room_area' => 40.5,
+                    'balcony_clearance' => 125,
+                    'main_door_clearance' => 140,
+                    'coverage_percent' => 22.8,
+                    'sofa_name' => 'Sofa Vòm Cong Modular Da Bò Ý Cognac',
+                    'sofa_dimensions' => '320 x 120 x 85 cm',
+                    'table_dimensions' => '110 x 110 x 42 cm',
+                ],
             ],
             'scandi_apartment' => [
                 'title' => 'Căn Hộ Chung Cư Hiện Đại Bắc Âu',
@@ -384,6 +397,19 @@ PROMPT;
                 'product_ids' => [2, 3, 5], // Sofa Modular Riviera, Ghế Lounge Ombré, Bàn Trà Marble Aria
                 'combo_name' => 'Bản Phối Cảnh: Không Gian Bắc Âu Ấm Cúng',
                 'category_hint' => 'living',
+                'before_image_url' => '/images/staged/apartment_before.jpg',
+                'staged_image_url' => '/images/staged/apartment_after.jpg',
+                'floorplan_data' => [
+                    'room_width' => 4.2,
+                    'room_length' => 6.5,
+                    'room_area' => 27.3,
+                    'balcony_clearance' => 115,
+                    'main_door_clearance' => 130,
+                    'coverage_percent' => 24.5,
+                    'sofa_name' => 'Sofa Cong Cloud Vải Nỉ Bouclé Kem',
+                    'sofa_dimensions' => '260 x 100 x 80 cm',
+                    'table_dimensions' => '90 x 90 x 42 cm',
+                ],
             ],
             'master_bedroom' => [
                 'title' => 'Phòng Ngủ Master Yên Bình & Thư Thái',
@@ -419,6 +445,19 @@ PROMPT;
                 'product_ids' => [7, 8, 9], // Giường Canopy Elysée, Tủ Áo Héritage, Gương Trang Trí Cascade
                 'combo_name' => 'Bản Phối Cảnh: Suite Nghỉ Dưỡng Master Hoàng Gia',
                 'category_hint' => 'bedroom',
+                'before_image_url' => '/images/staged/bedroom_before.jpg',
+                'staged_image_url' => '/images/staged/bedroom_after.jpg',
+                'floorplan_data' => [
+                    'room_width' => 4.8,
+                    'room_length' => 6.2,
+                    'room_area' => 29.8,
+                    'balcony_clearance' => 110,
+                    'main_door_clearance' => 120,
+                    'coverage_percent' => 26.2,
+                    'sofa_name' => 'Giường Ngủ Vòm Bọc Nỉ Sang Trọng Elysée',
+                    'sofa_dimensions' => '220 x 205 x 135 cm',
+                    'table_dimensions' => '55 x 45 x 50 cm',
+                ],
             ],
             'dining_lounge' => [
                 'title' => 'Phòng Ăn & Bếp Mở Sang Trọng',
@@ -454,6 +493,19 @@ PROMPT;
                 'product_ids' => [6, 4, 12], // Bàn Ăn Sovereign, Ghế Đọc Sách Noir, Tủ Bếp Bespoke Provence
                 'combo_name' => 'Bản Phối Cảnh: Phòng Đại Tiệc Tân Cổ Điển',
                 'category_hint' => 'dining',
+                'before_image_url' => '/images/staged/dining_before.jpg',
+                'staged_image_url' => '/images/staged/dining_after.jpg',
+                'floorplan_data' => [
+                    'room_width' => 4.6,
+                    'room_length' => 7.0,
+                    'room_area' => 32.2,
+                    'balcony_clearance' => 130,
+                    'main_door_clearance' => 150,
+                    'coverage_percent' => 25.0,
+                    'sofa_name' => 'Bàn Ăn Mặt Đá Nero Marquina 8 Ghế',
+                    'sofa_dimensions' => '240 x 110 x 76 cm',
+                    'table_dimensions' => '55 x 58 x 88 cm',
+                ],
             ],
         ];
 
@@ -652,6 +704,19 @@ PROMPT;
                 'detected_style' => $selectedPreset['style'],
                 'estimated_area' => $selectedPreset['area'],
                 'lighting_analysis' => $selectedPreset['lighting'],
+                'before_image_url' => $selectedPreset['before_image_url'] ?? '/images/staged/penthouse_before.jpg',
+                'staged_image_url' => $selectedPreset['staged_image_url'] ?? '/images/staged/penthouse_after.jpg',
+                'floorplan_data' => $selectedPreset['floorplan_data'] ?? [
+                    'room_width' => 4.8,
+                    'room_length' => 7.2,
+                    'room_area' => 35,
+                    'balcony_clearance' => 115,
+                    'main_door_clearance' => 135,
+                    'coverage_percent' => 24.5,
+                    'sofa_name' => 'Sofa Modular Riviera 3 Chỗ',
+                    'sofa_dimensions' => '280 x 105 x 82 cm',
+                    'table_dimensions' => '120 x 70 x 42 cm',
+                ],
                 'structural_analysis' => $selectedPreset['structural_analysis'] ?? [
                     'ceiling' => 'Trần thạch cao phẳng kết hợp họng gió âm trần cao độ 3.0m',
                     'floor' => 'Sàn gỗ kỹ thuật chống xước hoặc đá tự nhiên đồng bộ',
