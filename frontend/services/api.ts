@@ -771,7 +771,13 @@ export const adminService = {
   },
 
   // Orders
-  async getOrders(params?: { status?: string; payment_status?: string; q?: string; page?: number }): Promise<ApiResponse<ApiOrder[]>> {
+  async getOrders(params?: {
+    status?: string;
+    payment_status?: string;
+    q?: string;
+    page?: number;
+    per_page?: number | string;
+  }): Promise<ApiResponse<ApiOrder[]> & { pagination?: { current_page: number; last_page: number; per_page: number; total: number } }> {
     const query = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, val]) => {
@@ -782,7 +788,7 @@ export const adminService = {
     }
     const qs = query.toString() ? `?${query.toString()}` : "";
     const result = await request<ApiOrder[]>(`/admin/orders${qs}`, { cache: "no-store" });
-    return result as ApiResponse<ApiOrder[]>;
+    return result as ApiResponse<ApiOrder[]> & { pagination?: { current_page: number; last_page: number; per_page: number; total: number } };
   },
 
   async getOrderDetail(id: number | string): Promise<ApiResponse<ApiOrder>> {
@@ -796,6 +802,34 @@ export const adminService = {
       body: JSON.stringify(data),
     });
     return result as ApiResponse<ApiOrder>;
+  },
+
+  async updateOrder(id: number | string, data: Partial<ApiOrder>): Promise<ApiResponse<ApiOrder>> {
+    const result = await request<ApiOrder>(`/admin/orders/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    return result as ApiResponse<ApiOrder>;
+  },
+
+  async deleteOrder(id: number | string): Promise<ApiResponse<null>> {
+    const result = await request<null>(`/admin/orders/${id}`, {
+      method: "DELETE",
+    });
+    return result as ApiResponse<null>;
+  },
+
+  async bulkOrderAction(data: {
+    order_ids: (number | string)[];
+    action: "delete" | "update_status" | "update_payment";
+    status?: string;
+    payment_status?: string;
+  }): Promise<ApiResponse<null>> {
+    const result = await request<null>(`/admin/orders/bulk`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    return result as ApiResponse<null>;
   },
 
   // Vouchers

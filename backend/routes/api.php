@@ -183,6 +183,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::get('/orders', [AdminOrderController::class, 'index']);
     Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
     Route::put('/orders/{id}/status', [AdminOrderController::class, 'updateStatus']);
+    Route::put('/orders/{id}', [AdminOrderController::class, 'update']);
+    Route::delete('/orders/{id}', [AdminOrderController::class, 'destroy']);
+    Route::post('/orders/bulk', [AdminOrderController::class, 'bulkAction']);
 
     // Consultation Leads Management
     Route::get('/consultations', [AdminConsultationController::class, 'index']);
