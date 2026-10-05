@@ -637,7 +637,7 @@ export default function AdminProductsPage() {
             <div className="bg-black/40 p-3 rounded border border-white/10 flex items-center gap-3">
               <div className="relative w-12 h-12 rounded overflow-hidden flex-shrink-0 bg-charcoal">
                 <Image
-                  src={stockProduct.image_url || "/images/sofa-1.jpg"}
+                  src={stockProduct.images?.[0]?.image_url || (stockProduct as any).image || "/images/sofa-1.jpg"}
                   alt={stockProduct.name}
                   fill
                   className="object-cover"

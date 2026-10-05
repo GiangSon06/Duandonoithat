@@ -28,7 +28,7 @@ import Image from "next/image";
 import { formatPrice } from "@/lib/products";
 
 export type StagedItem3D = {
-  id: string;
+  id: string | number;
   name: string;
   role: string;
   material: string;

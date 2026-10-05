@@ -205,14 +205,14 @@ export type ApiVoucher = {
   id: number;
   code: string;
   name: string;
-  discount_type: "percent" | "fixed";
+  discount_type: "percent" | "fixed" | "free_shipping";
   discount_value: number;
   min_order_amount: number;
   max_discount?: number;
-  usage_limit: number;
-  used_count: number;
-  start_date: string;
-  end_date: string;
+  usage_limit?: number;
+  used_count?: number;
+  start_date?: string;
+  end_date?: string;
   is_active: boolean;
 };
 
@@ -595,12 +595,12 @@ export const lookbookService = {
 
 // 5. Order Service
 export const orderService = {
-  async createOrder(payload: CreateOrderPayload): Promise<ApiResponse<{ order: ApiOrder }>> {
-    const result = await request<{ order: ApiOrder }>("/orders", {
+  async createOrder(payload: CreateOrderPayload): Promise<ApiResponse<{ order: ApiOrder; user_coins?: number }>> {
+    const result = await request<{ order: ApiOrder; user_coins?: number }>("/orders", {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    return result as ApiResponse<{ order: ApiOrder }>;
+    return result as ApiResponse<{ order: ApiOrder; user_coins?: number }>;
   },
 
   async createMomoPayment(orderId: number): Promise<ApiResponse<MomoCreatePaymentResponse>> {

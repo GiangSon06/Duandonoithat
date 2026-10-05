@@ -1067,7 +1067,7 @@ export default function AdminOrdersPage() {
                       </div>
 
                       <span className="font-serif text-xs text-gold font-bold">
-                        {formatPrice(item.total_price)}
+                        {formatPrice(item.total_price ?? item.subtotal ?? (item.unit_price * item.quantity))}
                       </span>
                     </div>
                   ))

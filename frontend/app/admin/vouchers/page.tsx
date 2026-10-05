@@ -180,7 +180,7 @@ export default function AdminVouchersPage() {
 
               <div className="pt-4 border-t border-white/10 flex justify-between items-center">
                 <span className="text-[10px] text-beige/40">
-                  Hạn: {new Date(v.end_date).toLocaleDateString("vi-VN")}
+                  Hạn: {v.end_date ? new Date(v.end_date).toLocaleDateString("vi-VN") : "Vô thời hạn"}
                 </span>
                 <button
                   onClick={() => handleDelete(v.id)}
