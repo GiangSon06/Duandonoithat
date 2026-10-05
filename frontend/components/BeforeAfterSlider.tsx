@@ -10,15 +10,15 @@ import {
   Download,
   Columns,
   Sliders,
-  Check,
   Palette,
-  Eye,
-  RotateCcw,
 } from "lucide-react";
 
+export const DEFAULT_STAGED_BEFORE = "/images/staged/penthouse_before.jpg";
+export const DEFAULT_STAGED_AFTER = "/images/staged/penthouse_after.jpg";
+
 interface BeforeAfterSliderProps {
-  beforeImage: string;
-  afterImage: string;
+  beforeImage?: string;
+  afterImage?: string;
   roomTitle?: string;
   styleName?: string;
   onDownload?: () => void;
@@ -37,18 +37,39 @@ export default function BeforeAfterSlider({
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [activeTone, setActiveTone] = useState<string>("cognac");
 
+  // Safe image state with automatic fallback
+  const [beforeImg, setBeforeImg] = useState<string>(() => {
+    return beforeImage && beforeImage.trim() !== "" ? beforeImage : DEFAULT_STAGED_BEFORE;
+  });
+  const [afterImg, setAfterImg] = useState<string>(() => {
+    return afterImage && afterImage.trim() !== "" ? afterImage : DEFAULT_STAGED_AFTER;
+  });
+
+  useEffect(() => {
+    if (beforeImage && beforeImage.trim() !== "") {
+      setBeforeImg(beforeImage);
+    } else {
+      setBeforeImg(DEFAULT_STAGED_BEFORE);
+    }
+  }, [beforeImage]);
+
+  useEffect(() => {
+    if (afterImage && afterImage.trim() !== "") {
+      setAfterImg(afterImage);
+    } else {
+      setAfterImg(DEFAULT_STAGED_AFTER);
+    }
+  }, [afterImage]);
+
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleMove = useCallback(
-    (clientX: number) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = clientX - rect.left;
-      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      setSliderPosition(percent);
-    },
-    []
-  );
+  const handleMove = useCallback((clientX: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPosition(percent);
+  }, []);
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
@@ -91,11 +112,23 @@ export default function BeforeAfterSlider({
       return;
     }
     const a = document.createElement("a");
-    a.href = afterImage;
+    a.href = afterImg;
     a.download = `GS-Luxury-Staged-${Date.now()}.jpg`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  // Tone color styling
+  const getToneFilterClass = () => {
+    switch (activeTone) {
+      case "boucle":
+        return "brightness-[1.03] contrast-[1.02] saturate-[0.92]";
+      case "walnut":
+        return "brightness-[0.97] contrast-[1.12] sepia-[0.12]";
+      default:
+        return "brightness-100 contrast-[1.05] saturate-[1.08]";
+    }
   };
 
   return (
@@ -125,7 +158,7 @@ export default function BeforeAfterSlider({
               onClick={() => setViewMode("slider")}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all flex items-center gap-1.5 ${
                 viewMode === "slider"
-                  ? "bg-gold text-charcoal shadow-sm"
+                  ? "bg-gold text-charcoal shadow-sm font-semibold"
                   : "text-beige/60 hover:text-beige hover:bg-white/5"
               }`}
               title="Kéo thanh trượt so sánh"
@@ -137,7 +170,7 @@ export default function BeforeAfterSlider({
               onClick={() => setViewMode("split")}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all flex items-center gap-1.5 ${
                 viewMode === "split"
-                  ? "bg-gold text-charcoal shadow-sm"
+                  ? "bg-gold text-charcoal shadow-sm font-semibold"
                   : "text-beige/60 hover:text-beige hover:bg-white/5"
               }`}
               title="Xem tách đôi song song"
@@ -169,28 +202,32 @@ export default function BeforeAfterSlider({
       {viewMode === "split" ? (
         <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/15 relative">
           {/* Left: Before */}
-          <div className="relative w-full h-full min-h-[220px]">
+          <div className="relative w-full h-full min-h-[220px] bg-black">
             <Image
-              src={beforeImage}
+              src={beforeImg}
               alt="Hiện trạng phòng thực tế"
               fill
+              unoptimized
+              onError={() => setBeforeImg(DEFAULT_STAGED_BEFORE)}
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="absolute inset-0 bg-black/15 pointer-events-none" />
-            <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[11px] font-mono text-beige/90 flex items-center gap-1.5">
+            <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[11px] font-mono text-beige/90 flex items-center gap-1.5 shadow">
               <Camera size={13} className="text-white/60" />
               <span>[TRƯỚC] Hiện trạng phòng thực tế</span>
             </div>
           </div>
 
           {/* Right: After */}
-          <div className="relative w-full h-full min-h-[220px]">
+          <div className="relative w-full h-full min-h-[220px] bg-black">
             <Image
-              src={afterImage}
+              src={afterImg}
               alt="Phối cảnh nội thất GS Luxury"
               fill
-              className="object-cover"
+              unoptimized
+              onError={() => setAfterImg(DEFAULT_STAGED_AFTER)}
+              className={`object-cover transition-all duration-300 ${getToneFilterClass()}`}
               sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
@@ -206,15 +243,17 @@ export default function BeforeAfterSlider({
           ref={containerRef}
           onMouseDown={() => setIsDragging(true)}
           onTouchStart={() => setIsDragging(true)}
-          className="relative w-full h-full select-none cursor-ew-resize overflow-hidden"
+          className="relative w-full h-full select-none cursor-ew-resize overflow-hidden bg-black"
         >
           {/* 1. Underlying Layer: AFTER (Furnished Luxury Staged Room) */}
           <div className="absolute inset-0 w-full h-full">
             <Image
-              src={afterImage}
+              src={afterImg}
               alt="Phối cảnh nội thất hoàn thiện GS Luxury"
               fill
-              className="object-cover"
+              unoptimized
+              onError={() => setAfterImg(DEFAULT_STAGED_AFTER)}
+              className={`object-cover transition-all duration-300 ${getToneFilterClass()}`}
               priority
               sizes="100vw"
             />
@@ -229,9 +268,11 @@ export default function BeforeAfterSlider({
             }}
           >
             <Image
-              src={beforeImage}
+              src={beforeImg}
               alt="Hiện trạng phòng thực tế"
               fill
+              unoptimized
+              onError={() => setBeforeImg(DEFAULT_STAGED_BEFORE)}
               className="object-cover"
               priority
               sizes="100vw"

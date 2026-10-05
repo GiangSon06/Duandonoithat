@@ -635,10 +635,11 @@ export default function AiRoomStylistPage() {
                     styleName={result.detected_style}
                     roomArea={result.floorplan_data?.room_area || result.estimated_area || roomArea}
                     originalImage={
-                      result.before_image_url ||
-                      (activeTab === "upload" && customImage
+                      (activeTab === "upload" && customImage)
                         ? customImage
-                        : `/images/staged/penthouse_before.jpg`)
+                        : (result.before_image_url ||
+                           PRESET_ROOMS.find((p) => p.id === selectedPreset)?.before_image ||
+                           "/images/staged/penthouse_before.jpg")
                     }
                     items={result.combo_package?.items?.map((item, idx) => ({
                       id: item.id,
@@ -659,14 +660,16 @@ export default function AiRoomStylistPage() {
                 ) : (
                   <BeforeAfterSlider
                     beforeImage={
-                      result.before_image_url ||
-                      (activeTab === "upload" && customImage
+                      (activeTab === "upload" && customImage)
                         ? customImage
-                        : `/images/staged/penthouse_before.jpg`)
+                        : (result.before_image_url ||
+                           PRESET_ROOMS.find((p) => p.id === selectedPreset)?.before_image ||
+                           "/images/staged/penthouse_before.jpg")
                     }
                     afterImage={
                       result.staged_image_url ||
-                      `/images/staged/penthouse_after.jpg`
+                      PRESET_ROOMS.find((p) => p.id === selectedPreset)?.image ||
+                      "/images/staged/penthouse_after.jpg"
                     }
                     roomTitle={result.detected_room_type}
                     styleName={result.detected_style}

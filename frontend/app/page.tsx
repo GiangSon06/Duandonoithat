@@ -18,9 +18,14 @@ export default function Home() {
       <SiteChrome>
         <Hero />
         <VirtualRoomStudio />
-        <FlashSaleSection />
-        <BeforeAfterSlider />
-        <Lookbook />
+        <section className="py-12 md:py-16 max-w-[1360px] mx-auto px-6">
+          <BeforeAfterSlider
+            beforeImage="/images/staged/penthouse_before.jpg"
+            afterImage="/images/staged/penthouse_after.jpg"
+            roomTitle="Phòng Khách Penthouse Hoàng Gia"
+            styleName="Modern Italian Luxury"
+          />
+        </section>
         <CollectionsGrid />
         <Heritage />
         <Testimonials />
