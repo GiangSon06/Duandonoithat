@@ -190,10 +190,19 @@ export default function AccountPage() {
     }
   };
 
+  const getReferralLink = () => {
+    const code = user?.referral_code || affiliateStats?.referral_code || "GS-VIP";
+    if (typeof window !== "undefined" && window.location.origin) {
+      return `${window.location.origin}?ref=${code}`;
+    }
+    if (affiliateStats?.referral_link && !affiliateStats.referral_link.includes("localhost")) {
+      return affiliateStats.referral_link;
+    }
+    return `https://gsluxury-frontend0512.onrender.com?ref=${code}`;
+  };
+
   const handleCopyAffiliate = () => {
-    const link =
-      affiliateStats?.referral_link ||
-      `http://localhost:3000?ref=${user?.referral_code || "GS-VIP"}`;
+    const link = getReferralLink();
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2500);
@@ -602,10 +611,7 @@ export default function AccountPage() {
                             <input
                               type="text"
                               readOnly
-                              value={
-                                affiliateStats?.referral_link ||
-                                `http://localhost:3000?ref=${user?.referral_code || "GS-VIP"}`
-                              }
+                              value={getReferralLink()}
                               className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-xs font-mono text-gray-700 outline-none select-all"
                             />
                             <button

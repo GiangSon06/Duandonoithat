@@ -83,12 +83,22 @@ export default function AffiliateModal() {
 
   if (!isAffiliateOpen) return null;
 
-  const handleCopyLink = () => {
-    if (stats?.referral_link) {
-      navigator.clipboard.writeText(stats.referral_link);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+  const getReferralLink = () => {
+    const code = user?.referral_code || stats?.referral_code || "GS-VIP";
+    if (typeof window !== "undefined" && window.location.origin) {
+      return `${window.location.origin}?ref=${code}`;
     }
+    if (stats?.referral_link && !stats.referral_link.includes("localhost")) {
+      return stats.referral_link;
+    }
+    return `https://gsluxury-frontend0512.onrender.com?ref=${code}`;
+  };
+
+  const handleCopyLink = () => {
+    const link = getReferralLink();
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   const handleWithdrawSubmit = async (e: React.FormEvent) => {
@@ -259,7 +269,7 @@ export default function AffiliateModal() {
                         <input
                           type="text"
                           readOnly
-                          value={stats?.referral_link || `http://localhost:3000?ref=${user?.referral_code || "GS-VIP"}`}
+                          value={getReferralLink()}
                           className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono text-gray-600 outline-none select-all"
                         />
                         <button

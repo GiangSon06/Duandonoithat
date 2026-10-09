@@ -27,8 +27,17 @@ class AffiliateController extends Controller
         }
 
         $referralCode = $user->getReferralCode();
-        $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
-        $referralLink = "{$frontendUrl}?ref={$referralCode}";
+        
+        // Dynamically detect frontend origin from request header (Origin or Referer)
+        $origin = $request->header('Origin');
+        if (!$origin && $request->header('Referer')) {
+            $parsed = parse_url($request->header('Referer'));
+            if (!empty($parsed['scheme']) && !empty($parsed['host'])) {
+                $origin = $parsed['scheme'] . '://' . $parsed['host'] . (!empty($parsed['port']) ? ':' . $parsed['port'] : '');
+            }
+        }
+        $frontendUrl = $origin ?: env('FRONTEND_URL', 'https://gsluxury-frontend0512.onrender.com');
+        $referralLink = rtrim($frontendUrl, '/') . "?ref={$referralCode}";
 
         // Get commissions stats
         $commissions = AffiliateCommission::where('user_id', $user->id)->get();
