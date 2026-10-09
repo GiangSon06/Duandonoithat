@@ -17,7 +17,6 @@ import {
   User,
   X,
   CreditCard,
-  Trash2,
   ChevronLeft,
   ChevronRight,
   Printer,
@@ -102,11 +101,7 @@ export default function AdminOrdersPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
-  // Single order delete confirm dialog
-  const [deleteConfirmOrder, setDeleteConfirmOrder] = useState<ApiOrder | null>(
-    null
-  );
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+
 
   // Modal State for Order Detail & Edit
   const [selectedOrder, setSelectedOrder] = useState<ApiOrder | null>(null);
@@ -175,6 +170,19 @@ export default function AdminOrdersPage() {
     orderId: number,
     newStatus: string
   ) => {
+    const currentOrder = orders.find((o) => o.id === orderId);
+    const currentStatus = currentOrder ? getStatus(currentOrder) : "";
+
+    // Khi đang giao: không thể chọn các trạng thái trước, chỉ có thể chọn hoàn thành
+    if (currentStatus === "shipping" && newStatus !== "completed" && newStatus !== "shipping") {
+      alert("Đơn hàng đang ở trạng thái 'Đang Giao' chỉ có thể chuyển sang 'Hoàn Thành'!");
+      return;
+    }
+    if (currentStatus === "completed" && newStatus !== "completed") {
+      alert("Đơn hàng đã 'Hoàn Thành', không thể quay lại các trạng thái trước đó!");
+      return;
+    }
+
     try {
       const res = await adminService.updateOrderStatus(orderId, {
         status: newStatus,
@@ -228,47 +236,23 @@ export default function AdminOrdersPage() {
     }
   };
 
-  // Delete single order
-  const handleDeleteOrder = async (order: ApiOrder) => {
-    setDeletingId(order.id);
-    try {
-      const res = await adminService.deleteOrder(order.id);
-      if (res.success) {
-        // Immediately remove from state
-        setOrders((prev) => prev.filter((o) => o.id !== order.id));
-        setPaginationInfo((prev) => ({
-          ...prev,
-          total: Math.max(0, prev.total - 1),
-        }));
-        setSelectedIds((prev) => prev.filter((id) => id !== order.id));
-        if (selectedOrder?.id === order.id) {
-          setSelectedOrder(null);
-        }
-        setDeleteConfirmOrder(null);
-      } else {
-        alert(res.message || "Không thể xóa đơn hàng");
-      }
-    } catch (err: any) {
-      alert(err.message || "Lỗi khi xóa đơn hàng");
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
-  // Bulk actions (Delete, Status, Payment)
+  // Bulk actions (Status, Payment)
   const handleBulkAction = async (
-    action: "delete" | "update_status" | "update_payment",
+    action: "update_status" | "update_payment",
     value?: string
   ) => {
     if (selectedIds.length === 0) return;
 
-    if (
-      action === "delete" &&
-      !window.confirm(
-        `Bạn có chắc chắn muốn xóa vĩnh viễn ${selectedIds.length} đơn hàng đã chọn? Thao tác này sẽ hoàn trả kho và không thể hoàn tác!`
-      )
-    ) {
-      return;
+    if (action === "update_status" && value && value !== "completed") {
+      const hasShipping = orders.some(
+        (o) => selectedIds.includes(o.id) && getStatus(o) === "shipping"
+      );
+      if (hasShipping) {
+        alert(
+          "Các đơn hàng đang trong trạng thái 'Đang Giao' chỉ có thể chuyển sang 'Hoàn Thành'. Vui lòng bỏ chọn các đơn này hoặc chỉ chuyển sang 'Hoàn Thành'!"
+        );
+        return;
+      }
     }
 
     setBulkActionLoading(true);
@@ -356,7 +340,7 @@ export default function AdminOrdersPage() {
             {paginationInfo.total})
           </h1>
           <p className="text-xs text-beige/60 tracking-wider mt-1">
-            Trung tâm xử lý, phân công giao hàng, sửa thông tin &amp; xóa đơn hàng trực tiếp
+            Trung tâm xử lý, phân công giao hàng, sửa thông tin &amp; theo dõi trạng thái đơn hàng
           </p>
         </div>
 
@@ -474,20 +458,10 @@ export default function AdminOrdersPage() {
               <option value="unpaid">Chưa Trả</option>
             </select>
 
-            {/* Bulk Delete Button */}
-            <button
-              onClick={() => handleBulkAction("delete")}
-              disabled={bulkActionLoading}
-              className="px-3.5 py-1.5 bg-rose-500/20 border border-rose-500/40 hover:bg-rose-500 text-rose-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow"
-            >
-              <Trash2 size={13} />
-              <span>Xóa ({selectedIds.length}) Đơn</span>
-            </button>
-
             {/* Clear Selection */}
             <button
               onClick={() => setSelectedIds([])}
-              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-beige/60 hover:text-beige rounded-xl text-xs"
+              className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 text-beige/60 hover:text-beige rounded-xl text-xs"
             >
               Bỏ chọn
             </button>
@@ -634,35 +608,47 @@ export default function AdminOrdersPage() {
                             onChange={(e) =>
                               handleQuickStatusChange(order.id, e.target.value)
                             }
-                            className={`pl-6 pr-3 py-1.5 rounded-xl text-[11px] font-semibold uppercase tracking-wider outline-none cursor-pointer transition-all ${statusConf.badge} [&>option]:bg-charcoal [&>option]:text-beige`}
+                            className={`pl-6 pr-3 py-1.5 rounded-xl text-[11px] font-semibold uppercase tracking-wider outline-none cursor-pointer transition-all ${statusConf.badge} [&>option]:bg-charcoal [&>option]:text-beige [&>option:disabled]:text-beige/30 [&>option:disabled]:bg-black/80`}
                           >
-                            <option value="pending">Chờ Xác Nhận</option>
-                            <option value="confirmed">Đã Xác Nhận</option>
-                            <option value="shipping">Đang Giao</option>
+                            <option
+                              value="pending"
+                              disabled={currentStatus === "shipping" || currentStatus === "completed"}
+                            >
+                              Chờ Xác Nhận
+                            </option>
+                            <option
+                              value="confirmed"
+                              disabled={currentStatus === "shipping" || currentStatus === "completed"}
+                            >
+                              Đã Xác Nhận
+                            </option>
+                            <option
+                              value="shipping"
+                              disabled={currentStatus === "completed"}
+                            >
+                              Đang Giao
+                            </option>
                             <option value="completed">Hoàn Thành</option>
-                            <option value="cancelled">Đã Hủy</option>
+                            <option
+                              value="cancelled"
+                              disabled={currentStatus === "shipping" || currentStatus === "completed"}
+                            >
+                              Đã Hủy
+                            </option>
                           </select>
                         </div>
                       </td>
 
-                      {/* Actions Column (View Detail + Direct Delete) */}
+                      {/* Actions Column (View Detail only) */}
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleOpenDetailModal(order)}
-                            className="px-3 py-1.5 bg-white/5 hover:bg-gold hover:text-charcoal transition-all rounded-xl text-xs font-medium flex items-center gap-1.5 shadow"
+                            className="px-3.5 py-1.5 bg-white/5 hover:bg-gold hover:text-charcoal transition-all rounded-xl text-xs font-medium flex items-center gap-1.5 shadow border border-white/10 hover:border-gold"
                             title="Xem chi tiết & in hóa đơn"
                           >
                             <Eye size={13} />
                             <span>Xem Đơn</span>
-                          </button>
-
-                          <button
-                            onClick={() => setDeleteConfirmOrder(order)}
-                            className="p-2 bg-rose-500/15 hover:bg-rose-500 text-rose-300 hover:text-white transition-all rounded-xl shadow"
-                            title="Xóa đơn hàng này"
-                          >
-                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>
@@ -747,56 +733,7 @@ export default function AdminOrdersPage() {
         )}
       </div>
 
-      {/* SINGLE ORDER DELETE CONFIRMATION DIALOG */}
-      {deleteConfirmOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-charcoal border border-rose-500/40 rounded-3xl max-w-md w-full p-6 text-beige shadow-2xl space-y-5">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
-              <AlertTriangle size={24} />
-            </div>
 
-            <div className="text-center space-y-1.5">
-              <h3 className="font-serif text-lg text-champagne font-bold">
-                Xác Nhận Xóa Đơn Hàng?
-              </h3>
-              <p className="text-xs text-beige/70 leading-relaxed">
-                Bạn chuẩn bị xóa đơn hàng{" "}
-                <strong className="text-gold font-mono">
-                  #{deleteConfirmOrder.order_number}
-                </strong>{" "}
-                của khách hàng{" "}
-                <strong className="text-beige">
-                  {deleteConfirmOrder.customer_name}
-                </strong>
-                . Thao tác này sẽ tự động hoàn trả số lượng tồn kho và xóa vĩnh
-                viễn khỏi hệ thống!
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                onClick={() => setDeleteConfirmOrder(null)}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-beige hover:bg-white/10 text-xs font-medium transition-all"
-              >
-                Hủy Bỏ
-              </button>
-
-              <button
-                onClick={() => handleDeleteOrder(deleteConfirmOrder)}
-                disabled={deletingId === deleteConfirmOrder.id}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-rose-600/30"
-              >
-                <Trash2 size={13} />
-                <span>
-                  {deletingId === deleteConfirmOrder.id
-                    ? "Đang Xóa..."
-                    : "Xóa Vĩnh Viễn"}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* DETAILED ORDER MANAGEMENT & PRINT MODAL */}
       {selectedOrder && (
@@ -852,13 +789,33 @@ export default function AdminOrdersPage() {
                   onChange={(e) =>
                     handleQuickStatusChange(selectedOrder.id, e.target.value)
                   }
-                  className="bg-charcoal border border-gold/50 rounded-xl px-3 py-1.5 text-xs text-gold font-bold uppercase tracking-wider outline-none"
+                  className="bg-charcoal border border-gold/50 rounded-xl px-3 py-1.5 text-xs text-gold font-bold uppercase tracking-wider outline-none [&>option:disabled]:text-beige/30 [&>option:disabled]:bg-black/80"
                 >
-                  <option value="pending">Chờ Xác Nhận</option>
-                  <option value="confirmed">Đã Xác Nhận</option>
-                  <option value="shipping">Đang Giao</option>
+                  <option
+                    value="pending"
+                    disabled={getStatus(selectedOrder) === "shipping" || getStatus(selectedOrder) === "completed"}
+                  >
+                    Chờ Xác Nhận
+                  </option>
+                  <option
+                    value="confirmed"
+                    disabled={getStatus(selectedOrder) === "shipping" || getStatus(selectedOrder) === "completed"}
+                  >
+                    Đã Xác Nhận
+                  </option>
+                  <option
+                    value="shipping"
+                    disabled={getStatus(selectedOrder) === "completed"}
+                  >
+                    Đang Giao
+                  </option>
                   <option value="completed">Hoàn Thành</option>
-                  <option value="cancelled">Đã Hủy</option>
+                  <option
+                    value="cancelled"
+                    disabled={getStatus(selectedOrder) === "shipping" || getStatus(selectedOrder) === "completed"}
+                  >
+                    Đã Hủy
+                  </option>
                 </select>
               </div>
 
@@ -1079,7 +1036,7 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            {/* Total Summary & Danger Zone */}
+            {/* Total Summary */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10">
               <div className="text-xs text-beige/60">
                 Tổng thanh toán:{" "}
@@ -1090,15 +1047,17 @@ export default function AdminOrdersPage() {
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => {
-                    const toDelete = selectedOrder;
-                    setSelectedOrder(null);
-                    setDeleteConfirmOrder(toDelete);
-                  }}
-                  className="px-4 py-2 bg-rose-500/15 hover:bg-rose-500 text-rose-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow"
+                  onClick={handlePrintInvoice}
+                  className="px-4 py-2 bg-white/10 hover:bg-gold hover:text-charcoal border border-white/15 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow"
                 >
-                  <Trash2 size={13} />
-                  <span>Xóa Đơn Hàng Này</span>
+                  <Printer size={13} />
+                  <span>In Hóa Đơn</span>
+                </button>
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="px-4 py-2 bg-white/5 hover:bg-white/15 text-beige rounded-xl text-xs font-semibold transition-all shadow"
+                >
+                  <span>Đóng</span>
                 </button>
               </div>
             </div>

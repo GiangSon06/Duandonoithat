@@ -115,6 +115,22 @@ class AdminOrderController extends Controller
         $oldStatus = $order->order_status;
         $newStatus = $validated['status'];
 
+        // Đang giao thì các trạng thái trước đó không thể chọn, chỉ có thể chuyển sang hoàn thành
+        if ($oldStatus === Order::STATUS_SHIPPING && $newStatus !== Order::STATUS_COMPLETED && $newStatus !== Order::STATUS_SHIPPING) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đơn hàng đang ở trạng thái Đang Giao chỉ có thể chuyển sang Hoàn Thành.',
+            ], 422);
+        }
+
+        // Đơn hàng đã hoàn thành thì không quay lại các trạng thái trước
+        if ($oldStatus === Order::STATUS_COMPLETED && $newStatus !== Order::STATUS_COMPLETED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đơn hàng đã Hoàn Thành, không thể thay đổi về các trạng thái trước đó.',
+            ], 422);
+        }
+
         // Handle cancellation - restore stock
         if ($newStatus === Order::STATUS_CANCELLED && $oldStatus !== Order::STATUS_CANCELLED) {
             if (!$order->canCancel()) {
@@ -309,6 +325,12 @@ class AdminOrderController extends Controller
             if ($action === 'update_status' && !empty($validated['status'])) {
                 $newStatus = $validated['status'];
                 foreach ($orders as $order) {
+                    if ($order->order_status === Order::STATUS_SHIPPING && $newStatus !== Order::STATUS_COMPLETED) {
+                        continue;
+                    }
+                    if ($order->order_status === Order::STATUS_COMPLETED && $newStatus !== Order::STATUS_COMPLETED) {
+                        continue;
+                    }
                     if ($newStatus === Order::STATUS_CANCELLED && $order->order_status !== Order::STATUS_CANCELLED) {
                         $order->cancel('Hủy hàng loạt bởi quản trị viên');
                     } else {
