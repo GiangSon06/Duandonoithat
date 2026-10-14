@@ -30,7 +30,18 @@ class MomoController extends Controller
         $accessKey = config('services.momo.access_key') ?? env('MOMO_ACCESS_KEY');
         $secretKey = config('services.momo.secret_key') ?? env('MOMO_SECRET_KEY');
         $endpoint = config('services.momo.endpoint') ?? env('MOMO_ENDPOINT');
-        $redirectUrl = config('services.momo.redirect_url') ?? env('MOMO_REDIRECT_URL');
+        // Lấy domain trả về động từ frontend nếu đã deploy, tránh bị hardcode localhost:3000
+        $origin = $request->header('Origin');
+        if (!$origin && $request->header('Referer')) {
+            $parsed = parse_url($request->header('Referer'));
+            if (!empty($parsed['scheme']) && !empty($parsed['host'])) {
+                $origin = $parsed['scheme'] . '://' . $parsed['host'] . (!empty($parsed['port']) ? ':' . $parsed['port'] : '');
+            }
+        }
+
+        $redirectUrl = $request->input('redirect_url')
+            ?: ($origin ? rtrim($origin, '/') . '/order-success' : null)
+            ?: (config('services.momo.redirect_url') ?? env('MOMO_REDIRECT_URL'));
         $ipnUrl = config('services.momo.ipn_url') ?? env('MOMO_IPN_URL');
 
         if (!$partnerCode || !$accessKey || !$secretKey || !$endpoint) {

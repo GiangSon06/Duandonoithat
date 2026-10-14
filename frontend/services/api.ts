@@ -603,10 +603,14 @@ export const orderService = {
     return result as ApiResponse<{ order: ApiOrder; user_coins?: number }>;
   },
 
-  async createMomoPayment(orderId: number): Promise<ApiResponse<MomoCreatePaymentResponse>> {
+  async createMomoPayment(orderId: number, redirectUrl?: string): Promise<ApiResponse<MomoCreatePaymentResponse>> {
+    const dynamicRedirectUrl = typeof window !== "undefined" ? `${window.location.origin}/order-success` : undefined;
     const result = await request<MomoCreatePaymentResponse>("/momo/create-payment", {
       method: "POST",
-      body: JSON.stringify({ order_id: orderId }),
+      body: JSON.stringify({
+        order_id: orderId,
+        redirect_url: redirectUrl || dynamicRedirectUrl,
+      }),
     });
     return result as ApiResponse<MomoCreatePaymentResponse>;
   },
@@ -619,10 +623,15 @@ export const orderService = {
     return result as ApiResponse<MomoReturnResponse>;
   },
 
-  async createVnpayPayment(orderId: number, bankCode?: string): Promise<ApiResponse<VnpayCreatePaymentResponse>> {
+  async createVnpayPayment(orderId: number, bankCode?: string, returnUrl?: string): Promise<ApiResponse<VnpayCreatePaymentResponse>> {
+    const dynamicReturnUrl = typeof window !== "undefined" ? `${window.location.origin}/order-success` : undefined;
     const result = await request<VnpayCreatePaymentResponse>("/vnpay/create-payment", {
       method: "POST",
-      body: JSON.stringify({ order_id: orderId, bank_code: bankCode }),
+      body: JSON.stringify({
+        order_id: orderId,
+        bank_code: bankCode,
+        return_url: returnUrl || dynamicReturnUrl,
+      }),
     });
     return result as ApiResponse<VnpayCreatePaymentResponse>;
   },

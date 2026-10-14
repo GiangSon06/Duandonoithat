@@ -455,12 +455,12 @@ export default function CheckoutPage() {
         coins_used: coinsToUse,
         coins_discount: coinsDiscount,
         referral_code: referralCode || undefined,
-        idempotency_key: typeof window !== "undefined" 
+        idempotency_key: typeof window !== "undefined"
           ? (sessionStorage.getItem("gs_checkout_idempotency") || (() => {
-              const k = "gsl_idemp_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
-              sessionStorage.setItem("gs_checkout_idempotency", k);
-              return k;
-            })())
+            const k = "gsl_idemp_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+            sessionStorage.setItem("gs_checkout_idempotency", k);
+            return k;
+          })())
           : undefined,
         items: cart.map((item, index) => ({
           product_id: parseInt(String(item.product.id)) || index + 1,
@@ -569,7 +569,7 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between relative">
                 <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-neutral-200 -translate-y-1/2 z-0" />
                 <div className="absolute top-1/2 left-0 w-1/2 h-0.5 bg-gradient-to-r from-amber-600 to-amber-500 -translate-y-1/2 z-0" />
-                
+
                 {/* Step 1 */}
                 <Link href="/products" className="relative z-10 flex flex-col items-center group">
                   <div className="w-9 h-9 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-semibold shadow-sm group-hover:scale-105 transition-transform">
@@ -855,11 +855,10 @@ export default function CheckoutPage() {
                             <label
                               key={method.id}
                               onClick={() => handleSelectShippingMethod(method)}
-                              className={`flex items-start justify-between p-4 sm:p-4.5 border rounded-2xl cursor-pointer transition-all duration-200 ${
-                                isSelected
-                                  ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
-                                  : "border-neutral-200 hover:border-neutral-300 bg-white"
-                              }`}
+                              className={`flex items-start justify-between p-4 sm:p-4.5 border rounded-2xl cursor-pointer transition-all duration-200 ${isSelected
+                                ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
+                                : "border-neutral-200 hover:border-neutral-300 bg-white"
+                                }`}
                             >
                               <div className="flex items-start gap-3.5 min-w-0">
                                 <div className="pt-0.5">
@@ -926,11 +925,10 @@ export default function CheckoutPage() {
                   <div className="space-y-3">
                     {/* Bank Transfer / VietQR */}
                     <label
-                      className={`flex items-start gap-3.5 p-4 sm:p-4.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
-                        formData.payment_method === "bank_transfer"
-                          ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
-                          : "border-neutral-200 hover:border-neutral-300 bg-white"
-                      }`}
+                      className={`flex items-start gap-3.5 p-4 sm:p-4.5 rounded-2xl border cursor-pointer transition-all duration-200 ${formData.payment_method === "bank_transfer"
+                        ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
+                        : "border-neutral-200 hover:border-neutral-300 bg-white"
+                        }`}
                     >
                       <input
                         type="radio"
@@ -960,11 +958,10 @@ export default function CheckoutPage() {
 
                     {/* VNPAY */}
                     <label
-                      className={`flex items-start gap-3.5 p-4 sm:p-4.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
-                        formData.payment_method === "vnpay"
-                          ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
-                          : "border-neutral-200 hover:border-neutral-300 bg-white"
-                      }`}
+                      className={`flex items-start gap-3.5 p-4 sm:p-4.5 rounded-2xl border cursor-pointer transition-all duration-200 ${formData.payment_method === "vnpay"
+                        ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
+                        : "border-neutral-200 hover:border-neutral-300 bg-white"
+                        }`}
                     >
                       <input
                         type="radio"
@@ -994,11 +991,10 @@ export default function CheckoutPage() {
 
                     {/* MoMo */}
                     <label
-                      className={`flex items-start gap-3.5 p-4 sm:p-4.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
-                        formData.payment_method === "momo"
-                          ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
-                          : "border-neutral-200 hover:border-neutral-300 bg-white"
-                      }`}
+                      className={`flex items-start gap-3.5 p-4 sm:p-4.5 rounded-2xl border cursor-pointer transition-all duration-200 ${formData.payment_method === "momo"
+                        ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
+                        : "border-neutral-200 hover:border-neutral-300 bg-white"
+                        }`}
                     >
                       <input
                         type="radio"
@@ -1028,11 +1024,10 @@ export default function CheckoutPage() {
 
                     {/* COD */}
                     <label
-                      className={`flex items-start gap-3.5 p-4 sm:p-4.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
-                        formData.payment_method === "cod"
-                          ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
-                          : "border-neutral-200 hover:border-neutral-300 bg-white"
-                      }`}
+                      className={`flex items-start gap-3.5 p-4 sm:p-4.5 rounded-2xl border cursor-pointer transition-all duration-200 ${formData.payment_method === "cod"
+                        ? "border-amber-600 bg-amber-50/50 shadow-xs ring-1 ring-amber-600/30"
+                        : "border-neutral-200 hover:border-neutral-300 bg-white"
+                        }`}
                     >
                       <input
                         type="radio"

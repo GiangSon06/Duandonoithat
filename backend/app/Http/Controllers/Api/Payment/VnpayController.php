@@ -27,7 +27,18 @@ class VnpayController extends Controller
         $vnp_TmnCode = config('services.vnpay.tmn_code') ?? env('VNPAY_TMN_CODE');
         $vnp_HashSecret = config('services.vnpay.hash_secret') ?? env('VNPAY_HASH_SECRET');
         $vnp_Url = config('services.vnpay.url') ?? env('VNPAY_URL');
-        $vnp_Returnurl = config('services.vnpay.return_url') ?? env('VNPAY_RETURN_URL');
+        // Lấy domain trả về động từ frontend nếu đã deploy, tránh bị hardcode localhost:3000
+        $origin = $request->header('Origin');
+        if (!$origin && $request->header('Referer')) {
+            $parsed = parse_url($request->header('Referer'));
+            if (!empty($parsed['scheme']) && !empty($parsed['host'])) {
+                $origin = $parsed['scheme'] . '://' . $parsed['host'] . (!empty($parsed['port']) ? ':' . $parsed['port'] : '');
+            }
+        }
+
+        $vnp_Returnurl = $request->input('return_url')
+            ?: ($origin ? rtrim($origin, '/') . '/order-success' : null)
+            ?: (config('services.vnpay.return_url') ?? env('VNPAY_RETURN_URL'));
 
         if (!$vnp_TmnCode || !$vnp_HashSecret || !$vnp_Url) {
             return response()->json([
